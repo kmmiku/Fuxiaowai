@@ -1,0 +1,16 @@
+const assert = require('node:assert/strict');
+const { loadEts } = require('./ets-loader.cjs');
+const { CookieJar } = loadEts('entry/src/main/ets/network/http/CookieJar.ets');
+const jar = new CookieJar();
+jar.absorb('sid=a; Path=/private; Secure', 'a.test', '/private/login');
+assert.equal(jar.header('a.test', '/', false), '');
+assert.equal(jar.header('a.test', '/private/x', true), 'sid=a');
+jar.absorb('sid=gone; Path=/private; Max-Age=0', 'a.test');
+assert.equal(jar.header('a.test', '/private/x', true), '');
+jar.absorb('bad=1; Domain=other.test', 'a.test');
+assert.equal(jar.header('a.test'), '');
+jar.absorb('ok=1; Domain=a.test; Path=/', 'a.test');
+assert.equal(jar.header('sub.a.test'), 'ok=1');
+jar.absorb('#HttpOnly_a.test\tFALSE\t/\tFALSE\t1\told\tsecret', 'a.test');
+assert.equal(jar.has('old', 'a.test'), false);
+console.log('network cookie checks passed');

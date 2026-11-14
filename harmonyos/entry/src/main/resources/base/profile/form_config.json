@@ -1,0 +1,25 @@
+{
+  "forms": [
+    {
+      "name": "day_card",
+      "displayName": "$string:form_day_name",
+      "description": "$string:form_day_desc",
+      "src": "./ets/widget/pages/DayCard.ets",
+      "uiSyntax": "arkts",
+      "window": {
+        "designWidth": 720,
+        "autoDesignWidth": true
+      },
+      "colorMode": "auto",
+      "isDefault": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "06:10",
+      "updateDuration": 1,
+      "defaultDimension": "2*4",
+      "supportDimensions": [
+        "2*4",
+        "4*4"
+      ]
+    }
+  ]
+}

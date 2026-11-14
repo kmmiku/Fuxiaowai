@@ -1,0 +1,55 @@
+'use strict';
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs/promises');
+const os=require('node:os');
+const path=require('node:path');
+const {spawn}=require('node:child_process');
+
+test('desktop and mobile console actions, escaping, errors, confirmations and reduced motion',{skip:!process.env.FXW_QA_PLAYWRIGHT,timeout:60000},async t=>{
+ const {chromium}=require(process.env.FXW_QA_PLAYWRIGHT);
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'fxw-ui-'));
+ await fs.mkdir(path.join(root,'tickets'),{recursive:true});await fs.mkdir(path.join(root,'feedback','img'),{recursive:true});
+ const code='e'.repeat(32),id='1'.repeat(16),attack='<img src=x onerror="window.__xss=1">';
+ const snapshot={code,createdAt:Date.now(),term:attack,week:1,courses:[{id:'qa',room:'',name:'QA 课程',weekday:1,startPeriod:1,endPeriod:2,weeks:[1]}],periods:[]};
+ const original=JSON.stringify(snapshot);await fs.writeFile(path.join(root,'tickets',code+'.json'),original);
+ await fs.writeFile(path.join(root,'feedback',id+'.json'),JSON.stringify({id,createdAt:Date.now(),text:attack,contact:'qa-contact',images:[id+'_0.png'],app:'福小外',version:'0.1.1',device:'QA device',read:false}));
+ await fs.writeFile(path.join(root,'feedback','img',id+'_0.png'),Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aDZsAAAAASUVORK5CYII=','base64'));
+ const child=spawn(process.execPath,[path.resolve(process.env.FXW_QA_SERVER||'server/server.js')],{env:{...process.env,FXW_ROOT:root,FXW_PORT:'18896',FXW_ADMIN_USER:'qa',FXW_ADMIN_PASS:'qa-only-password'},stdio:['ignore','pipe','pipe']});
+ let browser;
+ t.after(async()=>{if(browser)await browser.close();if(child.exitCode===null){child.kill();await new Promise(r=>child.once('exit',r));}await fs.rm(root,{recursive:true,force:true});});
+ await new Promise((resolve,reject)=>{child.stdout.on('data',b=>{if(b.toString().includes('listening'))resolve();});child.once('exit',()=>reject(Error('server exited')));setTimeout(()=>reject(Error('startup timeout')),5000).unref();});
+ browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});
+ const context=await browser.newContext({httpCredentials:{username:'qa',password:'qa-only-password'},viewport:{width:1440,height:1050},reducedMotion:'reduce'});
+ const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>{const set=window.setTimeout,clear=window.clearTimeout;window.__qaPollTimers=new Set();window.setTimeout=(fn,ms,...args)=>{let id;id=set(()=>{window.__qaPollTimers.delete(id);fn(...args);},ms);if(ms===5000)window.__qaPollTimers.add(id);return id;};window.clearTimeout=id=>{window.__qaPollTimers.delete(id);clear(id);};});
+ await page.goto('http://127.0.0.1:18896/admin');await page.waitForSelector('#ticket-rows [data-ticket-action="inspect"]');
+ assert.equal(await page.locator('.brand img').evaluate(img=>img.complete&&img.naturalWidth>0),true);
+ assert.ok((await page.locator('#ticket-rows').innerText()).includes(attack));assert.equal(await page.evaluate(()=>window.__xss),undefined);
+ await page.locator('#inspect-code').fill('invalid');await page.locator('#inspect-submit').click();await page.waitForFunction(()=>document.getElementById('toast').textContent.includes('32位'));
+ await page.locator('#inspect-code').fill(code);await page.locator('#inspect-submit').click();await page.waitForFunction(()=>document.getElementById('inspect-status').textContent==='有效');
+ assert.equal(await fs.readFile(path.join(root,'tickets',code+'.json'),'utf8'),original);
+ await page.locator('[data-page="feedback"]').click();await page.locator('[data-feedback-id]').click();assert.ok((await page.locator('#feedback-detail').innerText()).includes(attack));assert.equal(await page.locator('#feedback-detail img').count(),1);
+ await page.getByRole('button',{name:'查看联系方式',exact:true}).click();assert.ok((await page.locator('#feedback-detail').innerText()).includes('qa-contact'));
+ await page.getByRole('button',{name:'放大反馈截图'}).click();assert.equal(await page.locator('#image-dialog').evaluate(d=>d.open),true);await page.locator('#close-image').click();
+ await page.getByRole('button',{name:'标为已读',exact:true}).click();await page.getByRole('button',{name:'已标为已读',exact:true}).waitFor();
+ await page.getByRole('button',{name:'删除留言',exact:true}).click();await page.locator('#confirm-dialog button[value="cancel"]').click();assert.equal(await fs.readFile(path.join(root,'feedback',id+'.json'),'utf8').then(()=>true),true);
+ await page.getByRole('button',{name:'删除留言',exact:true}).click();await page.locator('#confirm-action').click();await page.waitForFunction(()=>document.getElementById('feedback-list').textContent.includes('暂无反馈'));
+ await page.locator('[data-page="probes"]').click();await page.waitForFunction(()=>document.getElementById('probe-time').textContent.includes('采样于'));
+ await page.locator('[data-page="alerts"]').click();await page.waitForFunction(()=>document.getElementById('alerts-active-count').textContent.includes('项'));
+ await page.locator('[data-page="audit"]').click();await page.waitForFunction(()=>document.getElementById('audit-rows').textContent.includes('删除反馈'));
+ assert.ok(!(await page.locator('#audit-rows').innerText()).includes(code));
+ await page.route('**/api/admin/stats',route=>route.fulfill({status:503,contentType:'application/json',body:'{"ok":false,"msg":"QA unavailable"}'}));
+ await page.locator('#refresh-all').click();await page.waitForFunction(()=>!document.getElementById('global-error').hidden&&document.getElementById('global-error').textContent.includes('QA unavailable'));
+ await page.unroute('**/api/admin/stats');await page.locator('#refresh-all').click();await page.waitForFunction(()=>document.getElementById('global-error').hidden);
+ await page.evaluate(()=>{window.__qaHidden=false;Object.defineProperty(document,'hidden',{configurable:true,get:()=>window.__qaHidden});for(let i=0;i<5;i++){window.__qaHidden=true;document.dispatchEvent(new Event('visibilitychange'));window.__qaHidden=false;document.dispatchEvent(new Event('visibilitychange'));}});
+ await page.waitForFunction(()=>window.__qaPollTimers.size===1);assert.equal(await page.evaluate(()=>window.__qaPollTimers.size),1);
+ await fs.mkdir('D:/fxw_build/admin-upgrade/qa-results',{recursive:true});
+ for(const tab of ['codes','feedback','probes','alerts','audit']){
+  await page.locator('[data-page="'+tab+'"]').click();await page.screenshot({path:'D:/fxw_build/admin-upgrade/qa-results/'+tab+'-desktop.png',fullPage:true});
+  await page.setViewportSize({width:390,height:844});const overflow=await page.evaluate(()=>({fits:document.documentElement.scrollWidth<=innerWidth,width:document.documentElement.scrollWidth,offenders:[...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(0,8).map(e=>({tag:e.tagName,id:e.id,class:e.className,width:e.getBoundingClientRect().width}))}));assert.equal(overflow.fits,true,'mobile overflow '+tab+' '+JSON.stringify(overflow));
+  await page.screenshot({path:'D:/fxw_build/admin-upgrade/qa-results/'+tab+'-mobile.png',fullPage:true});await page.setViewportSize({width:1440,height:1050});
+ }
+ await page.setViewportSize({width:320,height:700});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.equal(await page.locator('.page:not([hidden])').evaluate(e=>getComputedStyle(e).animationName),'none');assert.deepEqual(errors,[]);
+});

@@ -1,0 +1,6 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {loadEts}=require('./ets-loader.cjs');
+function setup(responses){let count=0;class HttpClient{constructor(){this.jar={header:()=>'',absorb(){}};}static encodeForm(fields){return fields.map(f=>f.key+'='+f.value).join('&');}}
+ const mocks={'@ohos.hilog':{default:{info(){},warn(){}}},'../../../network/http/HttpClient':{HttpClient},'../../../network/http/RawHttp':{RawHttp:{postForm:async()=>({status:200,body:responses[count++],setCookie:''})}},'./RsaPublicKey':{},'./CasAuth':{},'./CasTicket':{},'./WecomQrLogin':{}};
+ const {ZhengfangAuth}=loadEts('entry/src/main/ets/data/remote/auth/ZhengfangAuth.ets',mocks);return {auth:new ZhengfangAuth(),count:()=>count};}
+test('grade fetch reads all pages rather than dropping items after100',async()=>{const first=Array.from({length:100},(_,i)=>({kcmc:'c'+i}));const h=setup([JSON.stringify({items:first,total:2,records:101,currentPage:1}),JSON.stringify({items:[{kcmc:'last'}],total:2,records:101,currentPage:2})]);const result=JSON.parse(await h.auth.fetchGrades(2026,3));assert.equal(result.items.length,101);assert.equal(h.count(),2);});
+test('malformed school body is not interpreted as empty grades',async()=>{const h=setup(['<html>login</html>']);await assert.rejects(h.auth.fetchGrades(2026,3));});

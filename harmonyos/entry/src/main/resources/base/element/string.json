@@ -1,0 +1,40 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "福小外 · 课表"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "福小外课表主界面"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "福小外"
+    },
+    {
+      "name": "reason_reminder",
+      "value": "在每节课开始前提醒你"
+    },
+    {
+      "name": "reason_calendar",
+      "value": "把你选择的课表导出成系统日历日程"
+    },
+    {
+      "name": "form_ability_desc",
+      "value": "把课表放到桌面上，不解锁也能看"
+    },
+    {
+      "name": "form_ability_label",
+      "value": "福小外课表"
+    },
+    {
+      "name": "form_day_name",
+      "value": "今天的课"
+    },
+    {
+      "name": "form_day_desc",
+      "value": "只显示今天要上的课，含时间、教室"
+    }
+  ]
+}

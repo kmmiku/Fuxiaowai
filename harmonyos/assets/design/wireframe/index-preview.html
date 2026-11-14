@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=360, initial-scale=1" />
+<title>福小外 · 主页面设计稿</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:360px;height:1140px;background:#F6F7FB;overflow:hidden;
+    font-family:"HarmonyOS Sans SC","Microsoft YaHei","PingFang SC",sans-serif;
+    -webkit-font-smoothing:antialiased;color:#1A1A1A}
+  .screen{width:360px;height:1140px;display:flex;flex-direction:column;position:relative}
+  /* 状态栏 */
+  .status{height:28px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px 0 20px;font-size:12px;font-weight:600}
+  .status .icons{display:flex;gap:5px;align-items:center}
+  /* 头部 */
+  .header{display:flex;align-items:flex-start;padding:8px 8px 4px 16px}
+  .header .t{flex:1}
+  .header .t h1{font-size:24px;font-weight:700;line-height:32px}
+  .header .t p{font-size:13px;color:#6B7280;margin-top:2px}
+  .acts{display:flex;gap:4px}
+  .act{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:10px;color:#1A1A1A}
+  /* 星期条 */
+  .weekbar{height:64px;display:flex;align-items:center;padding:0 4px}
+  .weekbar .m{width:44px;text-align:center;font-size:11px;color:#A0A6B1}
+  .day{flex:1;display:flex;flex-direction:column;align-items:center}
+  .day b{font-size:11px;font-weight:400;color:#6B7280}
+  .day span{font-size:13px;margin-top:4px;width:28px;height:28px;line-height:28px;text-align:center;border-radius:9px}
+  .day.today span{background:#1A1A1A;color:#fff;font-weight:700}
+  /* 课表卡 */
+  .card{background:#fff;border-radius:20px;margin:0 12px}
+  .card .cap{display:flex;justify-content:space-between;padding:10px 18px 4px;font-size:11px;color:#6B7280}
+  .card .cap em{font-style:normal;color:#A0A6B1}
+  .grid{display:flex;padding:0 6px 8px}
+  .tcol{width:38px;flex:none}
+  .tcell{height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #F2F4F8}
+  .tcell b{font-size:13px;font-weight:500;color:#6B7280}
+  .tcell i{font-style:normal;font-size:9px;color:#A0A6B1;line-height:12px;text-align:center;margin-top:2px}
+  .cols{flex:1;display:flex}
+  .col{flex:1;position:relative;border-top:1px solid #F2F4F8}
+  .col:first-child{border-top:none}
+  .rowline{height:52px;border-bottom:1px solid #F2F4F8}
+  .blk{position:absolute;left:2px;right:2px;border-radius:8px;overflow:hidden;display:flex;box-shadow:0 0 0 2px #fff}
+  .blk .bar{width:3px;flex:none}
+  .blk .body{flex:1;padding:3px 4px;overflow:hidden}
+  .blk .nm{font-size:10px;font-weight:500;line-height:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .blk .sub{font-size:9px;color:#6B7280;line-height:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .split{display:flex;flex-direction:column;gap:2px}
+  .split .blk{position:relative;left:auto;right:auto;flex:1}.split .blk .sub{display:none}
+  /* 周数卡 */
+  .slidercard{margin-top:12px;padding:16px}
+  .slidercard .row{display:flex;align-items:center}
+  .slidercard .row h3{font-size:15px;font-weight:500}
+  .slidercard .row .link{margin-left:auto;font-size:13px;color:#3D5AFE}
+  .track{margin-top:14px;height:6px;border-radius:3px;background:#E8EBF2;position:relative}
+  .track .fill{position:absolute;left:0;top:0;bottom:0;width:52.6%;border-radius:3px;background:#3D5AFE}
+  .track .knob{position:absolute;left:52.6%;top:-7px;width:20px;height:20px;border-radius:10px;background:#fff;border:2px solid #3D5AFE;transform:translateX(-50%)}
+  .wkbubble{position:absolute;left:52.6%;top:-40px;transform:translateX(-50%);background:#F1F3F8;border-radius:10px;padding:4px 10px;font-size:13px;white-space:nowrap}
+  /* 切换课表 */
+  .swcard{margin-top:12px;padding:16px}
+  .swcard .row{display:flex;align-items:center;font-size:13px;color:#6B7280}
+  .swcard .row .link{margin-left:auto;color:#3D5AFE}
+  .cards{display:flex;gap:10px;margin-top:10px}
+  .tbl{width:88px;height:88px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F2F4F8}
+  .tbl.on{background:#2B2F36;color:#fff}
+  .tbl em{font-style:normal;font-size:16px;height:20px;color:#fff}
+  .tbl span{font-size:11px;color:#6B7280;margin-top:2px}
+  .tbl.on span{color:#fff}
+  /* 功能宫格 */
+  .fgrid{margin-top:12px;background:#fff;border-radius:20px;padding:8px 6px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:76px 76px}
+  .fi{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:14px}
+  .fi b{font-size:20px;font-weight:400;line-height:28px}
+  .fi span{font-size:11px;color:#6B7280;margin-top:6px}
+  .foot{text-align:center;font-size:11px;color:#A0A6B1;margin:12px 0 16px}
+  /* 底部 tab */
+  .tabs{height:56px;background:#fff;border-radius:20px 20px 0 0;display:flex;align-items:center;margin-top:auto}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#A0A6B1}
+  .tab b{font-size:18px;font-weight:400;line-height:22px}
+  .tab span{font-size:10px;margin-top:2px}
+  .tab.on{color:#3D5AFE}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="status">
+    <div>20:45</div>
+    <div class="icons">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="#1A1A1A"><rect x="0" y="7.5" width="3" height="3.5" rx="1"/><rect x="4.6" y="5.5" width="3" height="5.5" rx="1"/><rect x="9.2" y="3" width="3" height="8" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"><path d="M1 3.4a10 10 0 0 1 13 0"/><path d="M3.4 6.2a6.6 6.6 0 0 1 8.2 0"/><path d="M5.8 9a3.2 3.2 0 0 1 3.4 0"/></svg>
+      <svg width="24" height="12" viewBox="0 0 24 12" fill="none"><rect x="0.6" y="0.6" width="20" height="10.8" rx="3.2" stroke="#1A1A1A" stroke-opacity=".4" stroke-width="1.2"/><rect x="2.4" y="2.4" width="15" height="7.2" rx="2" fill="#1A1A1A"/></svg>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="t">
+      <h1>第11周 周一</h1>
+      <p>2026/11/9</p>
+    </div>
+    <div class="acts"><div class="act">＋</div><div class="act">⇩</div><div class="act">↗</div><div class="act">⋯</div></div>
+  </div>
+
+  <div class="weekbar">
+    <div class="m">11月</div>
+    <div class="day today"><b>一</b><span>10</span></div>
+    <div class="day"><b>二</b><span>11</span></div>
+    <div class="day"><b>三</b><span>12</span></div>
+    <div class="day"><b>四</b><span>13</span></div>
+    <div class="day"><b>五</b><span>14</span></div>
+    <div class="day"><b>六</b><span>15</span></div>
+    <div class="day"><b>日</b><span>16</span></div>
+  </div>
+
+  <div class="card">
+    <div class="cap"><span>第11周</span><em>2026-2027学年 第1学期</em></div>
+    <div class="grid">
+      <div class="tcol">
+        <div class="tcell"><b>1</b><i>08:25<br>09:10</i></div>
+        <div class="tcell"><b>2</b><i>09:15<br>10:00</i></div>
+        <div class="tcell"><b>3</b><i>10:15<br>11:00</i></div>
+        <div class="tcell"><b>4</b><i>11:05<br>11:50</i></div>
+        <div class="tcell"><b>5</b><i>13:55<br>14:40</i></div>
+        <div class="tcell"><b>6</b><i>14:45<br>15:30</i></div>
+        <div class="tcell"><b>7</b><i>15:45<br>16:30</i></div>
+        <div class="tcell"><b>8</b><i>16:35<br>17:20</i></div>
+      </div>
+      <div class="cols">
+        <!-- 周一 -->
+        <div class="col">
+          <div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div>
+          <div class="blk" style="top:2px;height:100px;background:#EDEBFD"><div class="bar" style="background:#7C6CF0"></div><div class="body"><div class="nm" style="color:#7C6CF0">高级数据库技术</div><div class="sub">@教4203</div><div class="sub">梁艳</div></div></div>
+          <div class="blk" style="top:210px;height:48px;background:#E8F0FD"><div class="bar" style="background:#3D7EDB"></div><div class="body"><div class="nm" style="color:#3D7EDB">形势与政策5</div><div class="sub">@教150</div><div class="sub">杨艺璇</div></div></div>
+        </div>
+        <!-- 周二 -->
+        <div class="col">
+          <div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div>
+          <div class="blk" style="top:2px;height:204px;background:#FDF0E3"><div class="bar" style="background:#E8892B"></div><div class="body"><div class="nm" style="color:#E8892B">Hadoop开发技术</div><div class="sub">@实360 3数据3分析实验室</div><div class="sub">张国煜</div></div></div>
+        </div>
+        <!-- 周三 -->
+        <div class="col">
+          <div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div>
+          <div class="blk" style="top:2px;height:100px;background:#E6F6EE"><div class="bar" style="background:#2FA36B"></div><div class="body"><div class="nm" style="color:#2FA36B">高性能系统架构</div><div class="sub">@教540 4计算机基础实验室（一）</div><div class="sub">卢公明</div></div></div>
+          <div class="split" style="position:absolute;top:106px;height:100px;left:2px;right:2px">
+            <div class="blk" style="background:#FCE9EE;position:relative"><div class="bar" style="background:#E46A8B"></div><div class="body"><div class="nm" style="color:#E46A8B">机器学习</div><div class="sub">@实330 3</div><div class="sub">张紫铃</div></div></div>
+            <div class="blk" style="background:#F2F6DF;position:relative"><div class="bar" style="background:#8AA61F"></div><div class="body"><div class="nm" style="color:#8AA61F">虚拟化技术</div><div class="sub">@教520 2</div><div class="sub">李玉颖</div></div></div>
+          </div>
+        </div>
+        <!-- 周四 -->
+        <div class="col">
+          <div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div>
+          <div class="blk" style="top:2px;height:100px;background:#E5F4F8"><div class="bar" style="background:#2B9BB5"></div><div class="body"><div class="nm" style="color:#2B9BB5">数据采集与处理</div><div class="sub">@教430 1</div><div class="sub">刘海涛</div></div></div>
+          <div class="blk" style="top:106px;height:100px;background:#FDF0E3"><div class="bar" style="background:#E8892B"></div><div class="body"><div class="nm" style="color:#E8892B">Hadoop开发技术</div><div class="sub">@实510 3大数据与信息技术实验室</div><div class="sub">张国煜</div></div></div>
+          <div class="blk" style="top:210px;height:152px;background:#FCE9EE"><div class="bar" style="background:#E46A8B"></div><div class="body"><div class="nm" style="color:#E46A8B">机器学习</div><div class="sub">@实550 4计算机基础实验室（二）</div><div class="sub">张紫铃</div></div></div>
+        </div>
+        <!-- 周五 -->
+        <div class="col">
+          <div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div><div class="rowline"></div>
+          <div class="blk" style="top:2px;height:204px;background:#F3E8FA"><div class="bar" style="background:#9B59C9"></div><div class="body"><div class="nm" style="color:#9B59C9">HarmonyOS应用开发实践（产业）</div><div class="sub">@实130 1计算机网络与信息安全实验室</div><div class="sub">余能辉</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card slidercard">
+    <div class="row"><h3>周数</h3><div class="link">分享当前课表</div></div>
+    <div style="display:flex;align-items:center;margin-top:14px">
+      <div class="track" style="flex:1;margin-top:0"><div class="fill"></div><div class="knob"></div></div>
+      <div style="margin-left:10px;background:#F1F3F8;border-radius:10px;padding:4px 8px;font-size:13px">第11周</div>
+    </div>
+  </div>
+
+  <div class="card swcard">
+    <div class="row"><span>切换课表</span><div class="link">管理课表</div></div>
+    <div class="cards">
+      <div class="tbl on"><em>✓</em><span>我的课表</span></div>
+      <div class="tbl"><em style="color:#A0A6B1">＋</em><span>新建课表</span></div>
+    </div>
+  </div>
+
+  <div class="fgrid">
+    <div class="fi"><b>◷</b><span>上课时间</span></div>
+    <div class="fi"><b>☰</b><span>课表设置</span></div>
+    <div class="fi"><b>▤</b><span>已添加课程</span></div>
+    <div class="fi"><b>▢</b><span>小组件</span></div>
+    <div class="fi"><b>✉</b><span>联系我们</span></div>
+    <div class="fi"><b>◔</b><span>上课提醒</span></div>
+    <div class="fi"><b>☾</b><span>夜间模式</span></div>
+    <div class="fi"><b>▣</b><span>简洁模式</span></div>
+  </div>
+
+  <div class="foot">福小外 · 仅服务福州外语外贸学院</div>
+
+  <div class="tabs">
+    <div class="tab"><b>◷</b><span>日程</span></div>
+    <div class="tab on"><b>▦</b><span>课程</span></div>
+    <div class="tab"><b>✎</b><span>学习</span></div>
+    <div class="tab"><b>☺</b><span>我的</span></div>
+  </div>
+</div>
+</body>
+</html>

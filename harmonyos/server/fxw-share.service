@@ -1,0 +1,25 @@
+[Unit]
+Description=Fuxiaowai share service
+After=network.target
+[Service]
+Type=simple
+User=fxw
+Group=fxw
+WorkingDirectory=/opt/fxw-service
+EnvironmentFile=/etc/fxw-share.env
+ExecStart=/usr/bin/node /opt/fxw-service/server.js
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/fxw
+MemoryMax=512M
+LimitNOFILE=4096
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=fxw-share
+[Install]
+WantedBy=multi-user.target

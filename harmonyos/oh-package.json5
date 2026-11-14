@@ -1,0 +1,11 @@
+{
+  "modelVersion": "5.0.0",
+  "name": "fuxiaowai",
+  "version": "0.1.1",
+  "description": "福小外 · 福州外语外贸学院课表",
+  "main": "",
+  "author": "Fuxiaowai",
+  "license": "",
+  "dependencies": {},
+  "devDependencies": {}
+}

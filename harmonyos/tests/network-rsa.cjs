@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
+const {TextEncoder}=require('node:util');
+const {loadEts}=require('./ets-loader.cjs');
+let calls=0;
+const util={TextEncoder:class{ encodeInto(s){return new TextEncoder().encode(s);} },Base64Helper:class{decodeSync(s){return new Uint8Array(Buffer.from(s,'base64'));} encodeToStringSync(b){return Buffer.from(b).toString('base64');}}};
+const framework={createRandom(){return {generateRandomSync(n){calls++; const data=new Uint8Array(crypto.randomBytes(n)); if(calls===1)data.fill(0);return {data};}};}};
+const {RsaPublicKey}=loadEts('entry/src/main/ets/data/remote/auth/RsaPublicKey.ets',{'@ohos.util':{default:util},'@ohos.security.cryptoFramework':{default:framework}});
+const key=new RsaPublicKey(Buffer.alloc(128,255).toString('base64'),'AQ==');
+const result=Buffer.from(key.encrypt('密码'),'base64');
+assert.equal(result.length,128);assert.equal(result[0],0);assert.equal(result[1],2);
+const end=128-Buffer.byteLength('密码')-1;
+assert.ok(result.subarray(2,end).every(b=>b!==0));assert.equal(result[end],0);assert.equal(result.subarray(end+1).toString(),'密码');
+assert.ok(calls>1);assert.throws(()=>key.encrypt('x'.repeat(118)));
+console.log('network RSA crypto padding checks passed');

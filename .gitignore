@@ -1,0 +1,39 @@
+# ---- 通用 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+~$*
+
+# ---- 签名与发行物（任何目录都不得入库）----
+*.p12
+*.p7b
+*.csr
+*.cer
+*.pem
+*.hap
+*.app
+*.apk
+*.corrupt.bak
+**/signing/
+**/release/
+**/dist/
+
+# ---- 鸿蒙构建 ----
+**/.hvigor/
+**/oh_modules/
+**/node_modules/
+**/build/
+**/.preview/
+local.properties
+
+# ---- 编辑器 ----
+.vscode/
+.idea/
+
+# ---- Python / Node（后端与脚本）----
+__pycache__/
+*.py[cod]
+.pytest_cache/
+server/node_modules/

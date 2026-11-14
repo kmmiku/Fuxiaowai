@@ -1,0 +1,27 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/LoginPage",
+    "pages/PeriodSettings",
+    "pages/CourseListPage",
+    "pages/TimetableSettings",
+    "pages/AccountPage",
+    "pages/AboutPage",
+    "pages/TermPage",
+    "pages/AppearancePage",
+    "pages/RemindPage",
+    "pages/WidgetGuide",
+    "pages/AcademicCalendar",
+    "pages/GradePage",
+    "pages/ProfilePage",
+    "pages/PersonalInfoPage",
+    "pages/AvatarCropPage",
+    "pages/FeedbackPage",
+    "pages/AddCoursePage",
+    "pages/PrivacyDocPage",
+    "pages/ExamPage",
+    "pages/ExamWebPage",
+    "pages/FaqPage",
+    "pages/MorePage"
+  ]
+}
