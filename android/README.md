@@ -168,7 +168,9 @@ npm run check   # test + check:ui + build（提交前必须全绿）
 
 | 文件 | 大小 | SHA-256 |
 | --- | --- | --- |
-| `福小外-Android-0.1.1.apk`（Debug 验收包） | 4 628 048 B | `C22D6D288EBC13921AE31C05E6B37E1D47E7131BC5E15BA418A1E8E651CF1229` |
+| `Fuxiaowai-Android-0.1.1.apk`（构建名 `福小外-Android-0.1.1.apk`，Debug 验收包） | 4 628 048 B | `C22D6D288EBC13921AE31C05E6B37E1D47E7131BC5E15BA418A1E8E651CF1229` |
+
+> Release 附件不支持非 ASCII 文件名，上传时以 `Fuxiaowai-` 前缀命名，内容与本地构建产物一致（GitHub 侧 digest 相同）。
 
 发布说明见 [`../docs/release-notes/0.1.1-android.md`](../docs/release-notes/0.1.1-android.md)，安装包见 [Releases](../../releases)。
 
