@@ -39,6 +39,15 @@
 | 开发者 | 个人开发者（独立开发） |
 | 分享服务 | `http://113.45.242.182`（备案期直连 IP，反馈仍走 `https://fuxiaowai.xyz`） |
 
+## 下载
+
+| 平台 | 版本 | 安装包 | 获取 |
+| --- | --- | --- | --- |
+| HarmonyOS | 0.1.1（第一版） | `Fuxiaowai-0.1.1-harmonyos.hap`（1.43 MB）<br>`Fuxiaowai-0.1.1-harmonyos-app.zip`（上架包） | [Releases · v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/v0.1.1)；正式安装请到**华为应用市场**搜索「福小外」 |
+| Android | 0.1.1（versionCode 3） | `Fuxiaowai-Android-0.1.1.apk`（4.41 MB） | [Releases · android-v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/android-v0.1.1)；Debug 验收包，Android 5.1+ |
+
+变更详情：[鸿蒙版 0.1.1 发布说明](docs/release-notes/0.1.1.md) ｜ [安卓版 0.1.1 发布说明](docs/release-notes/0.1.1-android.md)。
+
 ---
 
 ## 界面预览
