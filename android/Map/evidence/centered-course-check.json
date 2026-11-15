@@ -1,0 +1,19 @@
+{
+  "sample": "synthetic one-period and eight-period courses at 390px viewport",
+  "name": {
+    "size": 15,
+    "weight": 700
+  },
+  "room": {
+    "size": 15,
+    "weight": 600
+  },
+  "shortAlign": "flex-start",
+  "longAlign": "center",
+  "roomIdentifier": "教5-103",
+  "identifierInsideHorizontally": true,
+  "roomInsideVertically": true,
+  "teacherOnCard": false,
+  "teacherInDetails": true,
+  "fullRoomInDetails": true
+}

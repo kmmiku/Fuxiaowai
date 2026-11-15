@@ -1,0 +1,24 @@
+{
+  "reason": "用户确认P1-P6：两校区、倒三角、SVG操作图标、15px日期及横线；用户确认校历预览：星期13px、数字行间横线居中、去除本月标签；用户批准底部四标签常驻及250ms滑块；用户确认校区底部滚轮预览；用户确认下节提示移除保留半间距及课程文字统一字号、教室教师500字重；批准首页卡片整合至三点菜单及八项象形线条图标；用户要求移除其他功能折叠模块；用户要求整条分享消息粘贴识别；用户明确课程名/教室16px及700字重，节次/时间12px，教师保持原样；用户确认15px课名700/教室600、整组居中、卡片隐藏教师和保留教室编号；用户确认纯色白字小圆角、固定字形不压缩、统一顶部与名称占位对齐；用户要求课程名称与地点整组垂直居中并采用较淡中等饱和度配色；用户要求每块最小顶部留白与参考图取样红粉青蓝配色；用户确认完整取样随机配色避邻色、首课普通块对齐、参考P3最小留白；用户要求首课按星期默认固定色、手动优先、选色器只用当前调色板；用户要求导入后只随机一次，翻周预加载直接读取持久颜色",
+  "pages": {
+    "src/pages/HomePage.tsx": "505866c74a4ab4079ba8cfcd19587d62ee86967a41f2d02c91ee5eee3985709b",
+    "src/pages/AddCoursePage.tsx": "9a86a8cc60c0cb0d5750311043361a3aa5e8bcf32c9ef004434fb1bd1a243cca",
+    "src/pages/AcademicCalendar.tsx": "625a1abae9136d981693485b83717b2c57e812cd33f061c795f8a5f5867085b9",
+    "src/pages/GradePage.tsx": "89247488eefd096f4048d0f4069889f1e059f5b9326db47d09be47ac4f4e2f9f",
+    "src/pages/ProfilePage.tsx": "90e14824be2bab3600898abcdec038ba187860cfd483d8e8dbc87c9287b2a9e7"
+  },
+  "files": {
+    "src/styles/px-cal.css": "cd3501435d8cafbf0a7d0562b827b93f624263cb628f813fabb6be20e6714ab7",
+    "src/styles/px-settings.css": "82a71c04d202d4a1a13c6befdaf7184e78bd282d6996f85535a8693ada43d561",
+    "src/ui/TimetableIcon.tsx": "2913c3703f815fcde2edc31cca099df2bb8953e5cfd358b7cdd04505f08a2955",
+    "src/App.tsx": "23ecb3b5c61b47402410c7e675dd7fcc95b402746ba4d2863df0e1437a67654a",
+    "src/components/BottomTabs.tsx": "14a3838083b03b052aea0319c4f00b541503fae3395a97e917a98d1773c57896",
+    "src/styles/app.css": "e9915dcc5f0b5cdf7ae2e32e23b397b2c474320b8966640470edce4b1d3a0c3f",
+    "src/components/CourseBlock.tsx": "44bde3cd512efea5e0911c46a5c05776cc3e6ee59b350bb3ca2980e97c9be909",
+    "src/styles/home.css": "f8d510b84605fdc9dbb31fbf173d57bc2147b895759675033d85f32ab3e4181b",
+    "src/components/MenuSheet.tsx": "04771f1f86834c14dd497033bfb91a601ad219aa4c16d41207e4bd76fb6e5e9b",
+    "src/components/TableSwitcher.tsx": "423e3b392a80a61b6a9741da822c45fb81320384858080ba283bae0356f55136",
+    "src/ui/LineIcons.tsx": "2463c68daf865bdeea5a80912d3c1210d12fd0ffbfff0e55611b8c258f2bb161",
+    "src/components/TimetableGrid.tsx": "96f39f48ff753eafa8bf1fbdd32826a333b99da56916c15abe1f1fb830b91844"
+  }
+}

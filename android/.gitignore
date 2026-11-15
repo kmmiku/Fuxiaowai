@@ -1,0 +1,23 @@
+node_modules/
+dist/
+release/
+*.tsbuildinfo
+android/.gradle/
+**/build/
+android/local.properties
+android/keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+.superpowers/
+.qa/
+
+.playwright-mcp/
+.env
+.env.*
+server/*.env
+
+# User emulator screenshot is local evidence, not a sanitized fixture.
+Map/evidence/boot-shot.png

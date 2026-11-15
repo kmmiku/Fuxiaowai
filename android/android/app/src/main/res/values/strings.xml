@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">福小外</string>
+    <string name="title_activity_main">福小外</string>
+    <string name="package_name">com.fuxiaowai.timetable</string>
+    <string name="custom_url_scheme">com.fuxiaowai.timetable</string>
+</resources>

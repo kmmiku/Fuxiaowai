@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>福小外 · 下载</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --text:#1a1d24; --sub:#5c6474; --hint:#98a0b0;
+    --line:#e7ebf3; --blue:#3d5afe; --blue2:#6e8bff; --green:#2fa36b;
+    --shadow:0 1px 2px rgba(20,30,60,.05), 0 6px 18px rgba(20,30,60,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0e1014; --card:#171a20; --text:#f2f3f7; --sub:#a9aebd; --hint:#767c8c;
+           --line:#252932; --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35); }
+  }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font:15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    padding:0 0 env(safe-area-inset-bottom);
+    overflow-x:hidden;
+  }
+  .wrap{ max-width:520px; margin:0 auto; padding:0 18px 40px; overflow-x:hidden; }
+
+  /* 头部 */
+  .hero{ padding:44px 0 22px; text-align:center; }
+  .logo{
+    width:96px; height:96px; border-radius:24px; display:block; margin:0 auto 16px;
+    box-shadow:0 8px 28px rgba(61,90,254,.28);
+  }
+  .hero h1{ margin:0; font-size:28px; letter-spacing:.5px; }
+  .hero p{ margin:8px 0 0; color:var(--sub); font-size:14px; }
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+    background:rgba(61,90,254,.1); color:var(--blue);
+    padding:6px 14px; border-radius:999px; font-size:12.5px; font-weight:600;
+  }
+
+  /* 下载卡 */
+  .dl{
+    background:var(--card); border-radius:22px; padding:20px; box-shadow:var(--shadow);
+    margin-top:22px;
+  }
+  .dl-meta{ display:flex; flex-wrap:wrap; gap:6px 10px; justify-content:space-between; align-items:center; margin-bottom:16px; }
+  .dl-meta .v{ font-size:13px; color:var(--sub); }
+  .dl-meta .v b{ color:var(--text); font-size:15px; font-weight:600; }
+  .dl-meta .s{ font-size:12.5px; color:var(--hint); text-align:right; line-height:1.5; white-space:normal; }
+  .btn{
+    display:block; width:100%; border:0; cursor:pointer; text-decoration:none;
+    background:linear-gradient(90deg, var(--blue), var(--blue2));
+    color:#fff; font-size:16.5px; font-weight:600; letter-spacing:.5px;
+    padding:16px; border-radius:16px; text-align:center;
+    box-shadow:0 8px 20px rgba(61,90,254,.28);
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:active{ transform:scale(.985); box-shadow:0 4px 12px rgba(61,90,254,.24); }
+  .btn-sub{ margin:12px 0 0; text-align:center; font-size:12px; color:var(--hint); }
+
+  /* 通用卡片 */
+  .card{ background:var(--card); border-radius:22px; padding:20px; box-shadow:var(--shadow); margin-top:16px; }
+  .card h2{ margin:0 0 14px; font-size:15px; font-weight:600; }
+  .card h2 span{ color:var(--hint); font-weight:400; font-size:12.5px; margin-left:8px; }
+
+  /* 安装步骤 */
+  .steps{ margin:0; padding:0; list-style:none; counter-reset:s; }
+  .steps li{
+    counter-increment:s; position:relative; padding:0 0 14px 34px; font-size:13.5px; color:var(--sub);
+  }
+  .steps li:last-child{ padding-bottom:0; }
+  .steps li::before{
+    content:counter(s); position:absolute; left:0; top:1px;
+    width:22px; height:22px; border-radius:50%; background:rgba(61,90,254,.1);
+    color:var(--blue); font-size:12px; font-weight:600; line-height:22px; text-align:center;
+  }
+  .steps li{ overflow-wrap:anywhere; }
+  .steps li b{ color:var(--text); font-weight:600; }
+
+  /* 功能格 */
+  .fgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .fitem{ background:var(--bg); border-radius:14px; padding:12px 13px; }
+  .fitem .ic{ font-size:15px; color:var(--blue); font-weight:600; }
+  .fitem .t{ font-size:13px; font-weight:600; margin-top:4px; }
+  .fitem .d{ font-size:11.5px; color:var(--hint); margin-top:2px; line-height:1.45; }
+
+  /* 截图 */
+  .shots{ display:flex; gap:12px; overflow-x:auto; padding:2px 0 6px; scroll-snap-type:x mandatory; }
+  .shots::-webkit-scrollbar{ display:none; }
+  .shots img{
+    width:172px; border-radius:14px; scroll-snap-align:start; flex:0 0 auto;
+    box-shadow:0 4px 14px rgba(20,30,60,.12); background:var(--bg);
+  }
+
+  /* 说明 */
+  .note{ font-size:12.5px; color:var(--hint); line-height:1.75; margin:0; overflow-wrap:anywhere; }
+  .note b{ color:var(--sub); font-weight:600; }
+  .foot{ text-align:center; font-size:11.5px; color:var(--hint); margin-top:26px; line-height:1.9; }
+  .foot a{ color:var(--blue); text-decoration:none; }
+  .hr{ height:1px; background:var(--line); margin:14px 0; border:0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <img class="logo" src="/shot/logo.png" alt="福小外">
+    <h1>福小外</h1>
+    <p>福州外语外贸学院 · 课表助手</p>
+    <div class="badge">一键导入教务课表，上课不再迟到</div>
+  </div>
+
+  <div class="dl">
+    <div class="dl-meta">
+      <div class="v">Android 版 <b>v{{VERSION}}</b></div>
+      <div class="s">{{SIZE}} · {{DATE}}</div>
+    </div>
+    <a class="btn" href="/download/{{APK}}" download>下载 APK</a>
+    <p class="btn-sub">支持 Android 8.0 及以上 · 无需登录即可浏览</p>
+  </div>
+
+  <div class="card">
+    <h2>安装说明<span>首次安装需允许「未知来源」</span></h2>
+    <ol class="steps">
+      <li>点上面的按钮下载 <b>APK</b> 文件（{{SIZE}}，约十几秒）。</li>
+      <li>下载完成后点开文件，系统会提示「禁止安装未知应用」，点<b>设置</b> → 允许这个来源安装，再返回。</li>
+      <li>安装完成后打开「福小外」，用<b>学号 + 教务密码</b>导入课表就能用了。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>它做什么</h2>
+    <div class="fgrid">
+      <div class="fitem"><div class="ic">课</div><div class="t">七天课表</div><div class="d">左右滑翻周，日/周翻面看当天</div></div>
+      <div class="fitem"><div class="ic">绩</div><div class="t">成绩与绩点</div><div class="d">自动算加权绩点，按学期筛选</div></div>
+      <div class="fitem"><div class="ic">考</div><div class="t">考试安排</div><div class="d">读取教务，没有就如实说没有</div></div>
+      <div class="fitem"><div class="ic">历</div><div class="t">校历</div><div class="d">两学期月历，今天红圈标出</div></div>
+      <div class="fitem"><div class="ic">件</div><div class="t">桌面小组件</div><div class="d">今天的课直接放桌面</div></div>
+      <div class="fitem"><div class="ic">享</div><div class="t">课表口令</div><div class="d">生成口令，同学输入即复用</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>界面预览<span>左右滑动</span></h2>
+    <div class="shots">
+      <img src="/shot/s1.jpg" alt="周课表" loading="lazy">
+      <img src="/shot/s2.jpg" alt="日视图" loading="lazy">
+      <img src="/shot/s3.jpg" alt="成绩" loading="lazy">
+      <img src="/shot/s4.jpg" alt="校历" loading="lazy">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>使用前须知</h2>
+    <p class="note">
+      <b>需要访问校内教务</b>：课表、成绩、考试都从 jw.fzfu.edu.cn 读取，校外请先连学校 VPN，否则只能看手动添加的课。<br>
+      <b>账号只用于登录教务</b>：学号密码保存在你自己的手机上，只发给教务系统，不经过任何第三方服务器。<br>
+      <b>个人开发</b>：本应用由学生个人开发，与学校官方无关；数据以教务系统为准。
+    </p>
+  </div>
+
+  <div class="foot">
+    福小外 v{{VERSION}} · 福州外语外贸学院<br>
+    <a href="/admin">管理后台</a>
+  </div>
+
+</div>
+</body>
+</html>

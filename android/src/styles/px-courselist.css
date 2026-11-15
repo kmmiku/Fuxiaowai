@@ -1,0 +1,130 @@
+/* 已添加课程 —— 对齐鸿蒙 CourseListPage.ets */
+
+.px-courselist {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.pxcl-nav {
+  height: calc(60px + var(--safe-top));
+  padding: calc(var(--safe-top)) var(--page-padding) 0 8px;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.pxcl-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.pxcl-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.pxcl-search {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  margin: 0 var(--page-padding);
+  padding: 0 12px;
+  background: var(--chip);
+  border-radius: 12px;
+}
+
+.pxcl-icon {
+  font-size: 16px;
+  color: var(--text-hint);
+  margin-right: 6px;
+}
+
+.pxcl-input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.pxcl-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pxcl-empty-title {
+  font-size: 13px;
+  color: var(--text-hint);
+}
+
+.pxcl-empty-sub {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.pxcl-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px var(--page-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pxcl-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 10px 10px;
+  background: var(--card);
+  border-radius: 14px;
+}
+
+.pxcl-bar {
+  width: 4px;
+  height: 44px;
+  flex: 0 0 4px;
+  border-radius: 2px;
+}
+
+.pxcl-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pxcl-name {
+  max-width: 100%;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pxcl-brief {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.pxcl-weeks {
+  margin-top: 2px;
+  font-size: 9px;
+  color: var(--text-hint);
+}

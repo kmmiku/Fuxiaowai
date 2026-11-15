@@ -1,0 +1,406 @@
+/* 登录 / 导入课表页 —— 对齐鸿蒙 LoginPage.ets */
+
+.px-login {
+  background: var(--bg);
+}
+
+.pxl-nav {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: calc(52px + var(--safe-top));
+  padding: calc(var(--safe-top)) var(--page-padding) 0 4px;
+}
+
+.pxl-back {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+}
+
+.pxl-back:active {
+  background: var(--chip);
+}
+
+.pxl-nav-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pxl-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 calc(var(--page-padding) + 4px) 24px;
+}
+
+.pxl-brand {
+  margin: 28px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.pxl-name {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pxl-sub {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.pxl-card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pxl-card-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pxl-input {
+  height: 48px;
+  border-radius: 12px;
+  background: var(--bg);
+  border: 0;
+  padding: 0 14px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+}
+
+.pxl-input::placeholder {
+  color: var(--text-hint);
+}
+
+.pxl-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.pxl-check input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  accent-color: var(--primary);
+}
+
+.pxl-check-text {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
+.pxl-check-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pxl-check-hint {
+  font-size: 9px;
+  color: var(--text-hint);
+}
+
+.pxl-btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(90deg, var(--primary) 0%, #6e8bff 100%);
+}
+
+.pxl-btn:disabled {
+  opacity: 0.7;
+}
+
+.pxl-status {
+  font-size: 11px;
+  color: var(--danger);
+}
+
+.pxl-status.ok {
+  color: var(--primary);
+}
+
+.pxl-note {
+  margin-top: 12px;
+  font-size: 9px;
+  color: var(--text-hint);
+  text-align: center;
+  line-height: 15px;
+}
+
+/* 登录入口圆形单选：只能选一个，选中圆环变蓝并在中间填实心圆 */
+.pxl-radios {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 2px 0 4px;
+}
+
+.pxl-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pxl-dot {
+  position: relative;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 1.6px solid var(--text-hint);
+  border-radius: 50%;
+  transition: border-color 160ms ease;
+}
+
+.pxl-radio[data-on='true'] .pxl-dot {
+  border-color: var(--primary);
+}
+
+.pxl-radio[data-on='true'] .pxl-dot::after {
+  content: '';
+  position: absolute;
+  inset: 3.6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pxl-dot-in 160ms ease;
+}
+
+@keyframes pxl-dot-in {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pxl-radio-text {
+  font-size: 13px;
+  color: var(--text-sub);
+  transition: color 160ms ease;
+}
+
+.pxl-radio[data-on='true'] .pxl-radio-text {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pxl-dot,
+  .pxl-radio-text {
+    transition: none;
+  }
+  .pxl-radio[data-on='true'] .pxl-dot::after {
+    animation: none;
+  }
+}
+/* ---------- 企业微信扫码 / 图片验证码 覆盖层 ---------- */
+
+.pxl-link {
+  align-self: center;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--primary);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pxl-link:active {
+  opacity: 0.6;
+}
+
+.pxl-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.42);
+  animation: pxl-mask-in 180ms ease;
+}
+
+@keyframes pxl-mask-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pxl-sheet {
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 20px calc(var(--page-padding) + 4px) calc(20px + var(--safe-bottom));
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: pxl-sheet-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pxl-sheet--qr {
+  align-items: stretch;
+}
+
+@keyframes pxl-sheet-in {
+  from {
+    transform: translateY(28px);
+    opacity: 0.4;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.pxl-sheet-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+}
+
+.pxl-sheet-msg {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--text-sub);
+  text-align: center;
+  min-height: 18px;
+}
+
+.pxl-sheet-tip {
+  font-size: 10px;
+  line-height: 15px;
+  color: var(--text-hint);
+  text-align: center;
+}
+
+.pxl-sheet-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pxl-ghost {
+  flex: 1;
+  height: 46px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text-sub);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pxl-ghost--main {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(90deg, var(--primary) 0%, #6e8bff 100%);
+}
+
+.pxl-ghost:disabled {
+  opacity: 0.6;
+}
+
+.pxl-qr-box {
+  position: relative;
+  align-self: center;
+  width: 208px;
+  height: 208px;
+  border-radius: 14px;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.pxl-qr-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.pxl-qr-empty {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.pxl-qr-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.52);
+  animation: pxl-mask-in 160ms ease;
+}
+
+.pxl-captcha {
+  align-self: center;
+  min-width: 208px;
+  height: 62px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.pxl-captcha img {
+  max-width: 100%;
+  max-height: 54px;
+  object-fit: contain;
+}
+
+.pxl-captcha span {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pxl-mask,
+  .pxl-sheet,
+  .pxl-qr-veil {
+    animation: none;
+  }
+}

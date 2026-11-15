@@ -1,0 +1,313 @@
+{
+  "fixture": "QA2024 synthetic data; 2026-11-14 09:00 device-local; 390x844 light / 320x844 dark",
+  "baseline": "f2ce3c4",
+  "comparisonStage": "Before final three approved privacy-copy corrections; markup contract was checked afterward.",
+  "initial": [
+    {
+      "route": "home",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "login",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "profile",
+      "width": 390,
+      "dark": false,
+      "identical": false,
+      "textSame": true
+    },
+    {
+      "route": "feedback",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "account",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "personal",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "periods",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "appearance",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "courses",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "timetable-settings",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "term",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "remind",
+      "width": 390,
+      "dark": false,
+      "identical": false,
+      "textSame": true
+    },
+    {
+      "route": "widget",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "calendar",
+      "width": 390,
+      "dark": false,
+      "identical": false,
+      "textSame": true
+    },
+    {
+      "route": "grades",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "exam",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "add-course",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "faq",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "more",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "about",
+      "width": 390,
+      "dark": false,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "home",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "login",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "profile",
+      "width": 320,
+      "dark": true,
+      "identical": false,
+      "textSame": true
+    },
+    {
+      "route": "feedback",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "account",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "personal",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "periods",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "appearance",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "courses",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "timetable-settings",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "term",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "remind",
+      "width": 320,
+      "dark": true,
+      "identical": false,
+      "textSame": true
+    },
+    {
+      "route": "widget",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "calendar",
+      "width": 320,
+      "dark": true,
+      "identical": false,
+      "textSame": true
+    },
+    {
+      "route": "grades",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "exam",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "add-course",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "faq",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "more",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    },
+    {
+      "route": "about",
+      "width": 320,
+      "dark": true,
+      "identical": true,
+      "textSame": true
+    }
+  ],
+  "stableRetest": {
+    "light": {
+      "profile": true,
+      "remind": true,
+      "calendar": true
+    },
+    "dark": {
+      "profile": true,
+      "remind": false,
+      "calendar": true
+    }
+  },
+  "remainingRasterDifference": {
+    "route": "remind",
+    "width": 320,
+    "dark": true,
+    "pixels": 810,
+    "bbox": [
+      14,
+      255,
+      304,
+      262
+    ],
+    "buttonsComputedStylesAndGeometryIdentical": true
+  },
+  "qaCspNote": "Only isolated screenshot copy had CSP meta removed for snapshot-tool compatibility; real app retained CSP and native bridge origin tests."
+}

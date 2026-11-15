@@ -1,0 +1,50 @@
+[
+  {
+    "hslL": 54.9,
+    "hslS": 93.9,
+    "name": "red",
+    "hex": "#F82050"
+  },
+  {
+    "hslL": 67.5,
+    "hslS": 81.9,
+    "name": "pink",
+    "hex": "#F06880"
+  },
+  {
+    "hslL": 40.8,
+    "hslS": 84.6,
+    "name": "teal",
+    "hex": "#10C0B0"
+  },
+  {
+    "hslL": 58.0,
+    "hslS": 93.5,
+    "name": "blue",
+    "hex": "#3080F8"
+  },
+  {
+    "hslL": 72.2,
+    "hslS": 90.1,
+    "name": "purple",
+    "hex": "#A078F8"
+  },
+  {
+    "hslL": 51.8,
+    "hslS": 94.3,
+    "name": "orange",
+    "hex": "#F89010"
+  },
+  {
+    "hslL": 54.9,
+    "hslS": 87.0,
+    "name": "cyan",
+    "hex": "#2898F0"
+  },
+  {
+    "hslL": 37.6,
+    "hslS": 83.3,
+    "name": "deepblue",
+    "hex": "#1060B0"
+  }
+]

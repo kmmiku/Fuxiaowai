@@ -1,0 +1,340 @@
+/* ============================================================
+   校历页（AcademicCalendar）私有样式
+   照搬鸿蒙版 pages/AcademicCalendar.ets：标题 56 高、学期滑块 42 高、
+   月卡 radius 20 / 内边距 12、日期格 46 高、日期圈 28 + 4px 圆点。
+   颜色全部走 tokens.css 的变量，深色由 :root[data-dark='true'] 自动接管。
+   ============================================================ */
+
+/* ---------- 页面骨架 ---------- */
+
+.px-cal {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ---------- 标题：校历 / 原文 ---------- */
+
+.px-cal-head {
+  display: flex;
+  align-items: center;
+  height: calc(56px + var(--safe-top));
+  padding: var(--safe-top) var(--page-padding) 0;
+  flex: 0 0 auto;
+}
+
+.px-cal-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.px-cal-link {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--primary);
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.px-cal-link:active {
+  background: var(--chip);
+}
+
+/* ---------- 学期滑块（白色 thumb 用 translateX 动 220ms） ---------- */
+
+.px-cal-seg {
+  position: relative;
+  height: 42px;
+  margin: 0 var(--page-padding);
+  background: var(--chip);
+  border-radius: 14px;
+  flex: 0 0 auto;
+}
+
+.px-cal-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 8px);
+  height: 34px;
+  border-radius: 10px;
+  background: var(--primary);
+  transform: translateX(0);
+  transition: transform 220ms cubic-bezier(0.16, 0.84, 0.44, 1);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.px-cal-seg[data-tab='1'] .px-cal-thumb {
+  transform: translateX(calc(100% + 8px));
+}
+
+.px-cal-seg-items {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.px-cal-seg-item {
+  flex: 1;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-sub);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.px-cal-seg-item[data-on='true'] {
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ---------- 第 N 周 · 共 M 周 / 红圈 = 今天 ---------- */
+
+.px-cal-week {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* 鸿蒙版 padding({left:16,right:16,top:10,bottom:2}) */
+  padding: 10px 16px 2px;
+  flex: 0 0 auto;
+}
+
+.px-cal-week-now {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.px-cal-week-total {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.px-cal-week-legend {
+  margin-left: auto;
+  font-size: 9px;
+  color: var(--text-hint);
+}
+
+/* ---------- 滚动区：月卡列表 + 学期安排 ---------- */
+
+.px-cal-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- 月卡 ---------- */
+
+.px-cal-month {
+  margin: 12px var(--page-padding) 0;
+  padding: 12px;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.px-cal-month-head {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.px-cal-month-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.px-cal-now {
+  flex: 0 0 auto;
+  font-size: 9px;
+  color: var(--primary);
+  padding: 2px 8px;
+  background: var(--chip);
+  border-radius: 8px;
+}
+
+/* 星期头：日一二三四五六 */
+.px-cal-weekhead {
+  display: flex;
+  width: 100%;
+  border-bottom: 1px solid var(--line);
+}
+
+.px-cal-weekday {
+  flex: 1;
+  height: 22px;
+  line-height: 22px;
+  font-size: 13px;
+  color: var(--text-sub);
+  text-align: center;
+}
+
+.px-cal-weekday[data-weekend='true'] {
+  color: var(--text-hint);
+}
+
+/* ---------- 日期网格：7 列，周日开头 ---------- */
+
+.px-cal-row {
+  display: flex;
+  width: 100%;
+}
+
+.px-cal-row + .px-cal-row {
+  border-top: 1px solid var(--line);
+}
+
+.px-cal-cell {
+  flex: 1;
+  height: 46px;
+  padding-top: 9px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.px-cal-day {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text);
+  border: 2px solid transparent;
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+/* 周末浅一档 */
+.px-cal-day.weekend {
+  color: var(--text-hint);
+}
+
+/* 今天：2px 红圈 + 红字 + Medium */
+.px-cal-day.today {
+  color: var(--danger);
+  font-weight: 500;
+  border-color: var(--danger);
+}
+
+/* 日期下方 4×4 事件圆点，无事件透明 */
+.px-cal-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 1px;
+  flex: 0 0 auto;
+}
+
+/* ---------- 月卡底部：分隔线 + 当月事件 ---------- */
+
+.px-cal-line {
+  width: 100%;
+  height: 1px;
+  background: var(--line);
+  margin: 6px 0;
+  flex: 0 0 auto;
+  /* 鸿蒙版 Divider strokeWidth 0.5：用 1px 再压一半，DPR≥2 时正好 1 设备像素 */
+  transform: scaleY(0.5);
+  transform-origin: center;
+}
+
+.px-cal-events {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.px-cal-event {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+}
+
+.px-cal-event-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.px-cal-event-date {
+  width: 64px;
+  flex: 0 0 auto;
+  font-size: 9px;
+  color: var(--text-sub);
+}
+
+.px-cal-event-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--text);
+}
+
+/* ---------- 学期安排卡 ---------- */
+
+.px-cal-summary {
+  margin: 12px var(--page-padding) 8px;
+  padding: 14px;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.px-cal-summary-title {
+  width: 100%;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.px-cal-summary-line {
+  width: 100%;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--text-sub);
+}
+
+/* ---------- 底部来源说明 ---------- */
+
+.px-cal-source {
+  flex: 0 0 auto;
+  width: 100%;
+  text-align: center;
+  font-size: 9px;
+  color: var(--text-hint);
+  padding: 6px var(--page-padding) 14px;
+}

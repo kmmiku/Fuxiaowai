@@ -1,0 +1,7 @@
+{
+  "harmony": true,
+  "android": true,
+  "draftProtected": true,
+  "urlField": true,
+  "environment": "staged production UI with isolated API responses"
+}

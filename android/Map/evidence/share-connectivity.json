@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-14",
+  "systemDns": "198.18.0.130",
+  "publicDns": "113.45.242.182",
+  "proxyPresent": true,
+  "https": {
+    "direct": "TLS handshake ECONNRESET",
+    "proxy": "TLS handshake failure",
+    "tls12": "ECONNRESET",
+    "tls13": "ECONNRESET"
+  },
+  "http": {
+    "status": 403,
+    "pageTitle": "非法阻断690"
+  },
+  "conclusion": "Request blocked before share API; cloud-side reason requires provider/server access",
+  "productionChanged": false
+}

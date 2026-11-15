@@ -1,0 +1,13 @@
+{
+  "sample": "synthetic courses,390px viewport",
+  "minimumTopPadding": 8,
+  "shortTopGap": 8,
+  "font": 15,
+  "lineHeight": 16,
+  "shortRoom": "教5-103",
+  "numericLineBoxesInsideCard": true,
+  "longCenterOffsetMaxPx": 0.00002,
+  "noGlyphScaling": true,
+  "paletteSource": "reference-palette-sample.json",
+  "sampling": "dominant 8-level RGB bucket, approximate screenshot colors; excludes annotation and white text"
+}

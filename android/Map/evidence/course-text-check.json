@@ -1,0 +1,16 @@
+{
+  "hintCount": 0,
+  "gap": 12.25,
+  "name": {
+    "size": "9px",
+    "weight": "700"
+  },
+  "room": {
+    "size": "9px",
+    "weight": "500"
+  },
+  "teacher": {
+    "size": "9px",
+    "weight": "500"
+  }
+}

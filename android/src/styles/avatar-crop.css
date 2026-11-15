@@ -1,0 +1,138 @@
+/* 头像框选裁剪层 —— 全屏黑底，中间方形选框显示成圆形，下面一条缩放滑块 */
+
+.avc-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: #0b0d12;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  animation: avc-in 180ms ease-out;
+}
+
+@keyframes avc-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.avc-head {
+  height: 52px;
+  flex: 0 0 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.avc-title {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: #f2f3f7;
+}
+
+.avc-cancel,
+.avc-done {
+  border: none;
+  background: none;
+  font-size: 14px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.avc-cancel {
+  color: rgba(242, 243, 247, 0.68);
+}
+
+.avc-done {
+  color: #6e8bff;
+  font-weight: 600;
+}
+
+.avc-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avc-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #14161c;
+  touch-action: none;
+  cursor: grab;
+}
+
+.avc-frame img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* 圆形蒙版：中间挖空，四角压暗，外圈一条白环 */
+.avc-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+
+.avc-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0, transparent calc(50% - 1px),
+      rgba(0, 0, 0, 0.55) calc(50% - 1px), rgba(0, 0, 0, 0.55) 100%);
+}
+
+.avc-zoom {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 28px 4px;
+}
+
+.avc-zoom-label {
+  font-size: 12px;
+  color: rgba(242, 243, 247, 0.6);
+}
+
+.avc-zoom-range {
+  flex: 1;
+  appearance: none;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.24);
+  outline: none;
+}
+
+.avc-zoom-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.avc-tip {
+  flex: 0 0 auto;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(242, 243, 247, 0.45);
+  padding: 8px 24px calc(var(--safe-bottom) + 16px);
+  line-height: 1.6;
+}

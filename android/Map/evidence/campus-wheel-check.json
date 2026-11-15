@@ -1,0 +1,10 @@
+{
+  "result": "PASS",
+  "checks": [
+    "two options",
+    "scroll and confirm",
+    "reopen at selection",
+    "cancel preserves value",
+    "immediate confirm after scroll"
+  ]
+}

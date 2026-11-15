@@ -1,0 +1,31 @@
+{
+  "sample": "isolated synthetic seven-day first courses",
+  "firstTitleOffsetsPx": [
+    16,
+    16,
+    16,
+    16,
+    222,
+    16,
+    16
+  ],
+  "longExceptionDay": 5,
+  "longThresholdPeriods": 6,
+  "roomIdentifier": "教5-103",
+  "minimumTopPaddingPx": 16,
+  "minRowHeightPx": 68,
+  "fontPx": 15,
+  "lineHeightPx": 16,
+  "randomSeedsTested": 20,
+  "adjacentColorsDifferent": true,
+  "sourceP3": {
+    "width": 56,
+    "height": 146,
+    "fillTop": 4,
+    "firstWhiteTextTop": 24,
+    "rawGapPixels": 20,
+    "layoutGapApproximation": 16,
+    "exactOriginalVpKnown": false
+  },
+  "paletteFile": "full-reference-palette.json"
+}

@@ -1,0 +1,1046 @@
+/* ============================================================
+   「我的成绩 / 考试安排 / 教务网页」逐像素对齐鸿蒙版
+   值全部照抄 entry/src/main/ets/pages/{GradePage,ExamPage,ExamWebPage}.ets
+   与 common/design/Tokens.ets；只在本文件维护，别处 CSS 不动。
+   前缀：pxg- 成绩 / 考试页；pxw- 内置网页
+   ============================================================ */
+
+/* ---------- 页面骨架 ---------- */
+
+.pxg-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.pxg-head {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  padding: calc(var(--safe-top) + 6px) 10px 6px 12px;
+  background: var(--bg);
+}
+
+.pxg-head-exam {
+  padding-left: 6px;
+}
+
+.pxg-head-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-left: 4px;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+}
+
+.pxg-head-spacer {
+  flex: 1 1 auto;
+}
+
+.pxg-icon-btn {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+  border-radius: 10px;
+}
+
+.pxg-icon-btn:disabled {
+  color: var(--text-hint);
+}
+
+.pxg-icon-btn:active:not(:disabled) {
+  background: var(--chip);
+}
+
+.pxg-back {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text);
+  border-radius: 10px;
+}
+
+.pxg-back:active {
+  background: var(--chip);
+}
+
+.pxg-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 14px;
+  /* 对应鸿蒙 List({ space: 8 })：卡片间距 8，再叠加各卡片自身 margin */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pxg-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- 加载 / 居中提示 ---------- */
+
+.pxg-center {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.pxg-spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 4px solid var(--chip);
+  border-top-color: var(--primary);
+  animation: pxg-spin 0.9s linear infinite;
+}
+
+@keyframes pxg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pxg-loading-text {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 12px;
+}
+
+.pxg-center-title {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.pxg-center-desc {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 8px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pxg-btn {
+  margin-top: 20px;
+  padding: 10px 24px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pxg-btn:active {
+  background: var(--primary-deep);
+}
+
+.pxg-btn-tight {
+  margin-top: 22px;
+}
+
+/* ---------- 蓝色 hero（成绩） ---------- */
+
+.pxg-hero {
+  padding: 18px;
+  border-radius: var(--radius-card);
+  background: linear-gradient(135deg, #3a56c8 0%, #5b6fe8 100%);
+  margin-bottom: 4px;
+}
+
+.pxg-hero-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.pxg-hero-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pxg-hero-col {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pxg-hero-label {
+  font-size: 11px;
+  color: #dde3ff;
+  line-height: 1.4;
+}
+
+.pxg-hero-value {
+  font-size: 34px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 2px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 右上角「考试安排 / 教务系统 ›」小胶囊 */
+.pxg-hero-entry {
+  width: 96px;
+  height: 58px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.149);
+  border: 1px solid rgba(255, 255, 255, 0.349);
+  color: #fff;
+}
+
+.pxg-hero-entry:active {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.pxg-entry-title {
+  font-size: 11px;
+  color: #fff;
+  line-height: 1.35;
+}
+
+.pxg-entry-sub {
+  font-size: 9px;
+  color: #dde3ff;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.pxg-hero-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 11px;
+  color: #dde3ff;
+  line-height: 1.4;
+}
+
+.pxg-hero-dot {
+  color: #9faeff;
+  margin: 0 6px;
+}
+
+.pxg-hero-warn {
+  color: #ffd9d6;
+}
+
+/* ---------- 学期筛选 ---------- */
+
+.pxg-term {
+  margin-bottom: 0;
+}
+
+.pxg-term-title {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin: 6px 0 10px;
+  line-height: 1.4;
+}
+
+.pxg-chips {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pxg-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.pxg-chip {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  margin-right: 8px;
+  border-radius: 14px;
+  background: var(--chip);
+  color: var(--text-sub);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.pxg-chip[data-on='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ---------- 成绩行 ---------- */
+
+.pxg-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.pxg-row-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pxg-row-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.pxg-row-sub {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+.pxg-row-dot {
+  color: var(--text-hint);
+  margin: 0 5px;
+}
+
+.pxg-score {
+  width: 64px;
+  height: 46px;
+  flex: 0 0 auto;
+  margin-left: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pxg-score-value {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.pxg-score-gpa {
+  font-size: 9px;
+  color: var(--text-hint);
+  margin-top: 1px;
+  line-height: 1.2;
+}
+
+/* 等级配色：0=优 1=良 2=中 3=及格 4=不及格 5=非百分制 */
+.pxg-lv0 {
+  background: #e4f5ec;
+}
+.pxg-lv0 .pxg-score-value {
+  color: #1e7a52;
+}
+
+.pxg-lv1 {
+  background: #e7eefc;
+}
+.pxg-lv1 .pxg-score-value {
+  color: #2a5bc7;
+}
+
+.pxg-lv2 {
+  background: #fcf0dc;
+}
+.pxg-lv2 .pxg-score-value {
+  color: #9a5b12;
+}
+
+.pxg-lv3 {
+  background: #fbe7de;
+}
+.pxg-lv3 .pxg-score-value {
+  color: #a2411c;
+}
+
+.pxg-lv4 {
+  background: #fbe3e2;
+}
+.pxg-lv4 .pxg-score-value {
+  color: #b3261e;
+}
+
+.pxg-lv5 {
+  background: #edeff3;
+}
+.pxg-lv5 .pxg-score-value {
+  color: #5b6273;
+}
+
+:root[data-dark='true'] .pxg-lv0 {
+  background: #1b3329;
+}
+:root[data-dark='true'] .pxg-lv1 {
+  background: #1b2740;
+}
+:root[data-dark='true'] .pxg-lv2 {
+  background: #33280f;
+}
+:root[data-dark='true'] .pxg-lv3 {
+  background: #33211a;
+}
+:root[data-dark='true'] .pxg-lv4 {
+  background: #331c1c;
+}
+:root[data-dark='true'] .pxg-lv5 {
+  background: #24262d;
+}
+
+.pxg-foot {
+  margin: 10px 0 24px;
+  font-size: 10px;
+  color: var(--text-hint);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ---------- 橙色 hero（考试） ---------- */
+
+.pxg-exam-hero {
+  padding: 18px;
+  border-radius: var(--radius-card);
+  background: linear-gradient(135deg, #c2582b 0%, #e08a4a 100%);
+  margin-bottom: 4px;
+}
+
+.pxg-exam-hero .pxg-hero-label {
+  color: #f2e4d5;
+}
+
+.pxg-hero-next {
+  flex: 1.6 1 0;
+  min-width: 0;
+}
+
+.pxg-exam-next {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pxg-exam-sum {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #f6eadf;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- 考试卡 ---------- */
+
+.pxg-exam-card {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.pxg-date {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  margin-right: 12px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fbebde;
+  color: #c2582b;
+}
+
+.pxg-date[data-tall='true'] {
+  height: 62px;
+}
+
+.pxg-date[data-passed='true'] {
+  background: #edeff3;
+  color: var(--text-hint);
+}
+
+:root[data-dark='true'] .pxg-date {
+  background: #33251b;
+}
+
+:root[data-dark='true'] .pxg-date[data-passed='true'] {
+  background: #23262d;
+}
+
+.pxg-date-day {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.pxg-date-mon {
+  margin-top: 1px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.pxg-exam-main {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.pxg-exam-title-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.pxg-exam-name {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.pxg-exam-name[data-passed='true'] {
+  color: var(--text-sub);
+}
+
+.pxg-tag {
+  flex: 0 0 auto;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: #fbebde;
+  color: #c2582b;
+  font-size: 9px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.pxg-tag[data-passed='true'] {
+  background: #edeff3;
+  color: var(--text-hint);
+}
+
+:root[data-dark='true'] .pxg-tag {
+  background: #33251b;
+}
+
+:root[data-dark='true'] .pxg-tag[data-passed='true'] {
+  background: #23262d;
+}
+
+.pxg-exam-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+.pxg-exam-line + .pxg-exam-line {
+  margin-top: 4px;
+}
+
+.pxg-exam-label {
+  font-size: 9px;
+  color: var(--text-hint);
+  line-height: 1.4;
+}
+
+.pxg-exam-label + span {
+  margin-left: 4px;
+}
+
+.pxg-exam-dot {
+  color: var(--text-hint);
+}
+
+.pxg-exam-dot.pxg-dot-5 {
+  margin: 0 5px;
+}
+
+.pxg-exam-dot.pxg-dot-6 {
+  margin: 0 6px;
+}
+
+/* ---------- 考试空态 / 链接 / 来源 ---------- */
+
+.pxg-exam-empty {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.pxg-exam-empty-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.pxg-exam-empty-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.pxg-exam-empty-sub {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text-sub);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pxg-exam-empty-tip {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-hint);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pxg-link {
+  display: block;
+  width: 100%;
+  padding: 12px 0;
+  font-size: 11px;
+  color: var(--primary);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.pxg-exam-empty .pxg-link {
+  padding-bottom: 24px;
+}
+
+/* 列表尾：链接 + 来源合成一个整体，避免 flex gap 插进两者之间 */
+.pxg-exam-tail {
+  display: block;
+  width: 100%;
+}
+
+.pxg-exam-source {
+  padding-bottom: 24px;
+  font-size: 10px;
+  color: var(--text-hint);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ---------- 内置教务网页 ---------- */
+
+.pxw-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.pxw-head {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: calc(48px + var(--safe-top));
+  padding: var(--safe-top) 10px 0 6px;
+  background: var(--bg);
+}
+
+.pxw-back {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text);
+  border-radius: 10px;
+}
+
+.pxw-back:active {
+  background: var(--chip);
+}
+
+.pxw-title {
+  flex: 1 1 0;
+  min-width: 0;
+  margin-left: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pxw-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--text);
+  border-radius: 10px;
+}
+
+.pxw-icon:active {
+  background: var(--chip);
+}
+
+.pxw-open {
+  flex: 0 0 auto;
+  padding: 6px 6px 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  border-radius: 10px;
+}
+
+.pxw-open:active {
+  background: var(--chip);
+}
+
+.pxw-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--bg);
+}
+
+.pxw-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--card);
+}
+
+.pxw-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.pxw-progress-bar {
+  width: 40%;
+  height: 100%;
+  background: var(--primary);
+  animation: pxw-slide 1.1s ease-in-out infinite;
+}
+
+@keyframes pxw-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(300%);
+  }
+}
+
+.pxw-err {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  background: var(--card);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.pxw-err-title {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.pxw-err-tip {
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--text-hint);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pxw-retry {
+  margin-top: 16px;
+  padding: 9px 24px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pxw-retry:active {
+  background: var(--primary-deep);
+}
+/* ---------- 学期滚轮 ---------- */
+
+.pxg-termbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(20, 30, 60, 0.05);
+  font: inherit;
+  transform: scale(1);
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 160ms ease,
+    box-shadow 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+/* 按下 0.9 缩回弹 + 边框变主色，提示这行可点 */
+.pxg-termbar:active {
+  transform: scale(0.9);
+  border-color: var(--primary);
+  box-shadow: none;
+  transition: transform 90ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pxg-termbar-key {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.pxg-termbar-val {
+  flex: 1;
+  margin-left: 8px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.pxg-termbar-arrow {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.wheel-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.38);
+}
+.wheel-sheet {
+  width: 100%;
+  padding-bottom: calc(var(--safe-bottom) + 10px);
+  border-radius: 20px 20px 0 0;
+  background: var(--card);
+  animation: wheel-up 220ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+@keyframes wheel-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.wheel-head {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px 6px;
+}
+.wheel-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+.wheel-done {
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--primary);
+}
+.wheel-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.wheel-band {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  border-radius: 10px;
+  background: var(--today-bg);
+  pointer-events: none;
+}
+.wheel-scroll {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+.wheel-scroll::-webkit-scrollbar {
+  display: none;
+}
+.wheel-item {
+  text-align: center;
+  font-size: 15px;
+  color: var(--text-hint);
+  scroll-snap-align: center;
+  transition: color 120ms ease;
+}
+.wheel-item[data-on='true'] {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.pxw-loading-text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: var(--text-hint);
+}
+
+/* ---------------- 身份验证刷新按钮（按下 90% 回弹） ---------------- */
+.pxg-id-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--chip);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  transform: scale(1);
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 160ms ease;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pxg-id-btn:active {
+  transform: scale(0.9);
+  background: var(--chip-strong, rgba(79, 110, 247, 0.18));
+  transition: transform 90ms cubic-bezier(0.3, 0, 0.6, 1), background-color 90ms ease;
+}
+
+.pxg-id-icon {
+  font-size: 15px;
+  line-height: 1;
+  display: inline-block;
+}
+
+.pxg-id-text {
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pxg-id-btn,
+  .pxg-id-btn:active {
+    transition: background-color 120ms ease;
+    transform: none;
+  }
+}
+
+/* ---------------- 数据时间 / 身份状态 ---------------- */
+.pxg-meta {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 8px 16px;
+  font-size: 12px;
+  color: var(--text-hint);
+}
+
+.pxg-meta-dot {
+  opacity: 0.6;
+}
+
+.pxg-meta-state.is-ok {
+  color: #1a9c6b;
+}
+
+.pxg-meta-state.is-warn {
+  color: #c9821a;
+}

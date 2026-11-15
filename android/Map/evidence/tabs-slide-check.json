@@ -1,0 +1,29 @@
+{
+  "result": "PASS",
+  "intermediate": {
+    "x": 200.769,
+    "target": 293,
+    "width": 86,
+    "targetWidth": 86,
+    "duration": "0.25s, 0.25s",
+    "count": 1
+  },
+  "final": {
+    "x": 12,
+    "target": 12,
+    "width": 68,
+    "targetWidth": 68,
+    "duration": "0s",
+    "count": 1
+  },
+  "checks": [
+    "first paint",
+    "intermediate animation",
+    "persistent DOM",
+    "rapid clicks",
+    "resize",
+    "subpage hidden",
+    "return snap",
+    "reduced motion"
+  ]
+}

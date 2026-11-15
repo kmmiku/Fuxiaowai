@@ -1,0 +1,1349 @@
+/* ============================================================
+   「我的」六页（Profile / PersonalInfo / Account / About /
+   Feedback / PrivacyDoc）—— 按鸿蒙版 entry/src/main/ets/pages/
+   逐条对照：字号 Font（title 24 / body 13 / small 11 / tiny 9）、
+   页边距 14、卡片圆角 20（Account·About 16）、分隔线左缩进
+   58（菜单行）/ 16（信息行）、按压底色 150ms 淡入淡出。
+   本文件只服务这六页，类名统一 pm- 前缀，不改动 tokens/app/
+   home/pages 的既有类。
+   ============================================================ */
+
+:root {
+  /* 菜单行按下底色：亮色 #F1F4FD，比卡片底深一档 */
+  --pm-press: #f1f4fd;
+  /* 主菜单汉字的圆底、隐私文档小标签的底色 */
+  --pm-glyph-bg: #eef1fb;
+  --pm-tag-bg: #eef1fb;
+  /* 撤回按钮的淡红底 / 文字色（鸿蒙版硬编码值） */
+  --pm-soft-danger: #fdecea;
+  --pm-soft-danger-text: #b3261e;
+}
+
+:root[data-dark='true'] {
+  --pm-press: #262b36;
+  --pm-glyph-bg: #232a44;
+  --pm-tag-bg: #232a44;
+  --pm-soft-danger: #33222a;
+}
+
+/* ---------------- 页面骨架 ---------------- */
+
+.pm-page {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* 顶部条：鸿蒙各页 padding 略有差异，用修饰类区分 */
+.pm-head {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+/* ProfilePage：left12 right10 top6 bottom6 */
+.pm-head--profile {
+  padding: calc(var(--safe-top) + 6px) 10px 6px 12px;
+}
+
+/* PersonalInfo / Feedback：left6 right10~14 top6 bottom6 */
+.pm-head--sub {
+  padding: calc(var(--safe-top) + 6px) 10px 6px 6px;
+}
+
+.pm-head--feedback {
+  padding: calc(var(--safe-top) + 6px) 14px 6px 6px;
+}
+
+/* PrivacyDoc：left6 right12 top6 bottom6 */
+.pm-head--doc {
+  padding: calc(var(--safe-top) + 6px) 12px 6px 6px;
+}
+
+/* Account / About：整条高 60，left8 right12 */
+.pm-head--bar {
+  height: calc(60px + var(--safe-top));
+  padding: var(--safe-top) 12px 0 8px;
+}
+
+.pm-back {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.pm-back:active {
+  opacity: 0.55;
+}
+
+/* Blank() 占位：把后面的内容顶到底部 */
+.pm-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text);
+  margin-left: 4px;
+}
+
+.pm-title--flex {
+  flex: 1;
+  min-width: 0;
+  margin-right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 滚动区：默认 14 左右内边距，底部按各页给 */
+.pm-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pm-body::-webkit-scrollbar {
+  display: none;
+}
+
+.pm-body--profile {
+  padding: 0 14px;
+}
+
+.pm-body--sub {
+  padding: 0 14px 24px;
+}
+
+.pm-body--feedback {
+  padding: 0 14px 30px;
+}
+
+.pm-body--doc {
+  padding: 0 14px;
+}
+
+/* Account / About：卡片自己带 12 外边距，容器不留边 */
+.pm-body--flush {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------- 卡片 ---------------- */
+
+/* 鸿蒙卡片只有底色 + 圆角，没有投影 */
+.pm-card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.pm-card--16 {
+  border-radius: 16px;
+}
+
+/* ---------------- 分隔线 ---------------- */
+
+.pm-divider {
+  height: 1px;
+  background: var(--line);
+  margin-left: 58px;
+}
+
+.pm-divider--16 {
+  margin-left: 16px;
+}
+
+.pm-divider--half {
+  height: 0.5px;
+}
+
+/* ---------------- 头像卡（Profile） ---------------- */
+
+.pm-account {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 18px 16px;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  text-align: left;
+}
+
+.pm-avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 auto;
+  border-radius: 36px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: linear-gradient(135deg, #3a56c8 0%, #5b6fe8 100%);
+}
+
+.pm-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 未登录：灰底人形剪影（● + ▁） */
+.pm-avatar--empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--chip);
+  color: var(--text-hint);
+  font-weight: 400;
+}
+
+.pm-avatar--empty span:first-child {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.pm-avatar--empty span:last-child {
+  font-size: 14px;
+  line-height: 1;
+  margin-top: -6px;
+}
+
+.pm-account-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pm-account-name {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.pm-account-name--guest {
+  font-size: 20px;
+}
+
+.pm-account-sub {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-sub);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pm-account-chev {
+  flex: 0 0 auto;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-hint);
+}
+
+/* ---------------- 菜单行 ---------------- */
+
+.pm-menu {
+  margin-top: 12px;
+}
+
+/* 主区（账号与安全）与次区（常见问题…）之间的分组间距 */
+.pm-card--sub {
+  margin-top: 22px;
+}
+
+.pm-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  text-align: left;
+  color: var(--text);
+  transition: background-color 150ms ease-out;
+}
+
+/* 按下（pointerdown 到抬起）时淡入，抬手淡出；与鸿蒙 onTouch 行为一致 */
+.pm-row:active,
+.pm-row[data-press='true'] {
+  background: var(--pm-press);
+}
+
+.pm-glyph {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1;
+  background: var(--pm-glyph-bg);
+  color: var(--primary);
+}
+
+/* 「更多」卡：灰底 + 次级文字色 */
+.pm-glyph--quiet {
+  background: var(--chip);
+  color: var(--text-sub);
+}
+
+.pm-row-main {
+  flex: 1;
+  min-width: 0;
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pm-row-title {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.pm-row-desc {
+  margin-top: 2px;
+  font-size: 9px;
+  line-height: 1.35;
+  color: var(--text-hint);
+}
+
+.pm-row-arrow {
+  flex: 0 0 auto;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-hint);
+}
+
+/* 「更多」小标题 */
+.pm-section {
+  width: 100%;
+  padding: 20px 4px 8px;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.pm-footer {
+  width: 100%;
+  margin: 20px 0 24px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text-hint);
+  text-align: center;
+}
+
+/* ---------------- 个人资料 ---------------- */
+
+.pm-avatar-hero {
+  width: 100%;
+  padding: 24px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pm-avatar80 {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.pm-avatar80-face {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: linear-gradient(135deg, #3a56c8 0%, #5b6fe8 100%);
+}
+
+.pm-avatar80-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 右下角换头像徽标：半透明灰圆底 + 2px 页面底色描边 */
+.pm-avatar-badge {
+  position: absolute;
+  left: 54px;
+  top: 54px;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background: #b3a8a8ad;
+  border: 2px solid var(--bg);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.pm-avatar-badge svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.pm-avatar-name {
+  margin-top: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.pm-avatar-clazz {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pm-avatar-tip {
+  margin-bottom: 16px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text-hint);
+}
+
+.pm-kv-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+}
+
+.pm-kv-label {
+  width: 76px;
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pm-kv-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+  text-align: right;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pm-note {
+  margin: 10px 4px 0 4px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-hint);
+}
+
+.pm-danger-row {
+  width: 100%;
+  height: 48px;
+  margin-top: 24px;
+  display: grid;
+  place-items: center;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  font-size: 13px;
+  color: #d64545;
+}
+
+/* ---------------- 底部弹层（退出 / 撤回） ---------------- */
+
+.pm-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.4);
+  animation: pm-fade 200ms ease-out;
+}
+
+@keyframes pm-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pm-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 71;
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-radius: 32px 32px 0 0;
+  padding-bottom: var(--safe-bottom);
+  overflow: hidden;
+  animation: pm-sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes pm-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* PersonalInfo：bindSheet height 240，无拖动条 */
+.pm-sheet--logout {
+  height: calc(240px + var(--safe-bottom));
+}
+
+/* PrivacyDoc：bindSheet height 250，带拖动条 */
+.pm-sheet--revoke {
+  height: calc(250px + var(--safe-bottom));
+}
+
+.pm-grabber {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  margin: 8px auto 0;
+}
+
+.pm-sheet-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 6px;
+}
+
+.pm-sheet-title {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pm-sheet-text {
+  margin: 10px 24px 0;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+.pm-sheet-actions {
+  margin-top: 26px;
+  padding: 0 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.pm-sheet-btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.pm-sheet-btn--ghost {
+  background: var(--chip);
+  color: var(--text);
+}
+
+.pm-sheet-btn--danger {
+  background: #d64545;
+  color: #fff;
+}
+
+/* 隐私撤回弹层：标题 17、正文 11/20、按钮胶囊 */
+.pm-doc-confirm {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-doc-confirm-title {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pm-doc-confirm-text {
+  margin: 10px 24px 0;
+  text-align: center;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--text-sub);
+}
+
+.pm-doc-confirm-actions {
+  margin-top: auto;
+  padding: 0 20px 22px;
+  display: flex;
+  gap: 10px;
+}
+
+.pm-doc-confirm-btn {
+  flex: 1;
+  height: 42px;
+  border-radius: 21px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.pm-doc-confirm-btn--ghost {
+  background: var(--chip);
+  color: var(--text);
+}
+
+.pm-doc-confirm-btn--danger {
+  background: var(--pm-soft-danger-text);
+  color: #fff;
+}
+
+/* ---------------- 账号与安全 ---------------- */
+
+.pm-acct-card {
+  background: var(--card);
+  border-radius: 16px;
+  margin: 0 12px;
+}
+
+.pm-acct-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+}
+
+.pm-acct-label {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-hint);
+}
+
+.pm-acct-user {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.pm-acct-update {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--chip);
+  font-size: 13px;
+  color: var(--primary);
+}
+
+.pm-acct-update:active {
+  background: var(--pm-press);
+}
+
+.pm-acct-info {
+  background: var(--card);
+  border-radius: 16px;
+  margin: 12px 12px 0;
+}
+
+.pm-acct-line {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 13px 16px;
+}
+
+.pm-acct-line-label {
+  flex: 0 0 auto;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.pm-acct-line-value {
+  margin-left: auto;
+  padding-left: 12px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-sub);
+  text-align: right;
+  word-break: break-word;
+}
+
+.pm-acct-note {
+  width: 100%;
+  padding: 10px 4px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--text-hint);
+}
+
+.pm-acct-actions {
+  margin-top: auto;
+  width: 100%;
+  padding: 0 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* 鸿蒙 Button 默认胶囊形，账号页两个按钮没设圆角 */
+.pm-acct-btn {
+  width: 100%;
+  height: 46px;
+  border-radius: 23px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.pm-acct-btn--plain {
+  background: var(--card);
+  color: var(--danger);
+}
+
+.pm-acct-btn--solid {
+  background: var(--danger);
+  color: #fff;
+}
+
+.pm-acct-btn:disabled {
+  opacity: 0.55;
+}
+
+/* ---------------- 关于与反馈 ---------------- */
+
+.pm-about-head {
+  width: 100%;
+  padding: 8px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.pm-about-name {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.pm-about-tag {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pm-about-rows {
+  background: var(--card);
+  border-radius: 16px;
+  margin: 0 12px;
+}
+
+.pm-about-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 13px 16px;
+}
+
+.pm-about-key {
+  flex: 0 0 auto;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.pm-about-val {
+  flex: 1;
+  min-width: 0;
+  margin-left: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-sub);
+  text-align: right;
+}
+
+.pm-about-feedback {
+  margin: 12px 12px 0;
+  padding: 16px;
+  background: var(--card);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pm-about-feedback-title {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.pm-about-feedback-text {
+  font-size: 11px;
+  line-height: 19px;
+  color: var(--text-sub);
+}
+
+.pm-about-mail {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--primary);
+}
+
+.pm-about-foot {
+  margin-top: auto;
+  width: 100%;
+  padding: 0 24px 24px;
+  font-size: 9px;
+  line-height: 1.45;
+  color: var(--text-hint);
+  text-align: center;
+}
+
+/* ---------------- 反馈问题 ---------------- */
+
+.pm-fb-pending {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--text-hint);
+}
+
+.pm-fb-text-card {
+  width: 100%;
+  padding: 12px;
+  background: var(--card);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-fb-textarea {
+  width: 100%;
+  height: 150px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  background: transparent;
+  resize: none;
+  padding: 0;
+  display: block;
+}
+
+.pm-fb-count {
+  width: 100%;
+  padding: 0 6px 4px 0;
+  font-size: 9px;
+  line-height: 1.4;
+  color: var(--text-hint);
+  text-align: right;
+}
+
+.pm-fb-media-card {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--card);
+  border-radius: var(--radius-card);
+}
+
+.pm-fb-media-head {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pm-fb-media-title {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.pm-fb-media-num {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-hint);
+}
+
+.pm-fb-shots {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.pm-fb-shot {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  flex: 0 0 auto;
+  margin-right: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--chip);
+}
+
+.pm-fb-shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pm-fb-shot-del {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: #99000000;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.pm-fb-shot-add {
+  width: 84px;
+  height: 84px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: var(--chip);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pm-fb-shot-plus {
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-hint);
+}
+
+.pm-fb-shot-label {
+  margin-top: 2px;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--text-hint);
+}
+
+.pm-fb-contact-card {
+  width: 100%;
+  margin-top: 12px;
+  padding: 6px 8px 6px 14px;
+  background: var(--card);
+  border-radius: var(--radius-card);
+}
+
+.pm-fb-contact-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pm-fb-contact-label {
+  width: 76px;
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.pm-fb-contact-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.pm-fb-submit {
+  width: 100%;
+  height: 46px;
+  margin-top: 20px;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  transform: scale(1);
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), background-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pm-fb-submit:active,
+.pm-fb-submit[data-press='true'] {
+  transform: scale(0.9);
+  transition: transform 90ms cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--primary-deep);
+}
+
+.pm-fb-submit:disabled {
+  opacity: 0.55;
+}
+
+/* 输入框占位文字：浅灰引导 */
+.pm-fb-textarea::placeholder,
+.pm-fb-contact-input::placeholder {
+  color: var(--text-hint);
+  opacity: 1;
+}
+
+/* 结果弹窗（成功 / 失败） */
+.pm-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 71;
+  width: min(300px, calc(100vw - 72px));
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 20px 16px;
+  border-radius: 18px;
+  background: var(--card);
+  animation: pm-dialog-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes pm-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.pm-dialog-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 21px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.pm-dialog-icon.ok {
+  background: #e6f6ee;
+  color: #2fa36b;
+}
+
+.pm-dialog-icon.bad {
+  background: #fdecea;
+  color: #e8453c;
+}
+
+.pm-dialog-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.pm-dialog-body {
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--text-sub);
+  text-align: center;
+}
+
+.pm-dialog-btn {
+  width: 100%;
+  height: 38px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  transform: scale(1);
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pm-dialog-btn:active {
+  transform: scale(0.94);
+  transition: transform 90ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pm-fb-foot {
+  width: 100%;
+  margin-top: 12px;
+  padding: 0 20px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-hint);
+  text-align: center;
+}
+
+/* ---------------- 隐私文档 ---------------- */
+
+.pm-doc-intro {
+  width: 100%;
+  margin-bottom: 12px;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--text-sub);
+}
+
+.pm-doc-kv-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 12px 16px;
+}
+
+.pm-doc-kv-k {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.pm-doc-kv-v {
+  margin-top: 4px;
+  font-size: 11px;
+  line-height: 19px;
+  color: var(--text-sub);
+}
+
+.pm-doc-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 16px;
+}
+
+.pm-doc-sec-head {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pm-doc-sec-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.pm-doc-tag {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--pm-tag-bg);
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--primary);
+}
+
+.pm-doc-line {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.pm-doc-dot {
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--text-hint);
+}
+
+.pm-doc-line-text {
+  flex: 1;
+  min-width: 0;
+  margin-left: 6px;
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--text-sub);
+}
+
+.pm-doc-action {
+  width: 100%;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-doc-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.pm-doc-btn--primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.pm-doc-btn--soft {
+  background: var(--pm-soft-danger);
+  color: var(--pm-soft-danger-text);
+}
+
+.pm-doc-btn:disabled {
+  opacity: 0.55;
+}
+
+.pm-doc-action-note {
+  width: 100%;
+  margin-top: 10px;
+  font-size: 9px;
+  line-height: 1.45;
+  color: var(--text-hint);
+  text-align: center;
+}
+
+/* 导出兜底：剪贴板不可用时直接铺在页面里 */
+.pm-doc-json {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--chip);
+  color: var(--text-sub);
+  font-size: 10px;
+  line-height: 1.5;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.pm-doc-foot {
+  width: 100%;
+  margin: 18px 0 24px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--text-hint);
+  text-align: center;
+}
+
+/* 线条图标在圆形底里居中，不被 flex 压扁 */
+.pm-glyph svg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* 常见问题：可展开问答 */
+.pm-faq {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pm-faq-q {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text);
+}
+
+.pm-faq-mark {
+  flex: 0 0 auto;
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--text-hint);
+}
+
+.pm-faq[data-open='true'] .pm-faq-mark {
+  color: var(--primary);
+}
+
+.pm-faq-a {
+  padding: 0 16px 14px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--text-sub);
+}
+/* 联系方式必填标记 */
+.pm-fb-req {
+  color: #e8453c;
+  margin-left: 2px;
+  font-size: 13px;
+  line-height: 1;
+}

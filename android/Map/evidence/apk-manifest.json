@@ -1,0 +1,8 @@
+{
+  "package": "com.fuxiaowai.timetable",
+  "artifact": "android\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+  "sha256": "58884fad5bdcc29950b6cd245f0a1e968a03ca5946af94dc8c31a2652be64834",
+  "bytes": 4613151,
+  "type": "debug",
+  "releaseSigningChanged": false
+}

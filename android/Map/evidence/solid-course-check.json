@@ -1,0 +1,24 @@
+{
+  "viewport": 390,
+  "sample": "synthetic single-period and eight-period cards",
+  "nameFont": 15,
+  "nameWeight": 700,
+  "roomFont": 15,
+  "roomWeight": 600,
+  "whiteText": true,
+  "solidBackground": true,
+  "numberTransforms": "none",
+  "shortRoom": "教5-103",
+  "shortRoomClientHeight": 36,
+  "shortRoomScrollHeight": 36,
+  "equalHeightCardTitleTop": [
+    1,
+    1
+  ],
+  "equalHeightCardRoomTop": [
+    55,
+    55
+  ],
+  "teacherCardHidden": true,
+  "screenshot": "browser screenshot timed out; runtime geometry checked"
+}

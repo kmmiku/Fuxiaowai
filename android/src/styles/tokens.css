@@ -1,0 +1,127 @@
+/* ============================================================
+   设计令牌：照搬鸿蒙版 Tokens.ets，用 CSS 变量表达深浅两套
+   所有组件只引用 var(--xxx)，禁止硬编码色值
+   ============================================================ */
+
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1a1a1a;
+  --text-sub: #6b7280;
+  --text-hint: #a0a6b1;
+  --line: #eef1f6;
+  --primary: #3d5afe;
+  --primary-deep: #2a3eb1;
+  --danger: #e5484d;
+  --chip: #f1f3f9;
+  --chip-deep: #e3e7f4;
+  --tab-sel: #e4e9fa;
+  --grid-line: #f0f2f6;
+  --today-bg: #f0f3ff;
+  --today-mark: #1a1a1a;
+
+  /* 卡片阴影：鸿蒙版用 0 0 12 透明黑，这里换成更轻的投影 */
+  --shadow: 0 1px 2px rgba(20, 24, 41, 0.04), 0 6px 18px rgba(20, 24, 41, 0.05);
+  --shadow-float: 0 -8px 32px rgba(20, 24, 41, 0.16);
+
+  --radius-card: 20px;
+  --radius-block: 8px;
+  --radius-pill: 999px;
+
+  --page-padding: 12px;
+  --cell-height: 52px;
+  --time-col: 38px;
+  --gap: 12px;
+
+  --tab-h: 56px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+:root[data-dark='true'] {
+  --bg: #101114;
+  --card: #1b1d22;
+  --text: #f2f3f7;
+  --text-sub: #a9aebd;
+  --text-hint: #767c8c;
+  --line: #2a2d35;
+  --chip: #23262d;
+  --chip-deep: #2f3542;
+  --tab-sel: #2b3350;
+  --grid-line: #282b33;
+  --today-bg: #1c2130;
+  --today-mark: #f2f3f7;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- 基础重置 ---------- */
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'HarmonyOS Sans SC', 'PingFang SC',
+    'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  outline: none;
+  width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-hint);
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 隐藏滚动条但保留滚动 */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 禁用长按选中与系统菜单，避免和长按手势冲突 */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}

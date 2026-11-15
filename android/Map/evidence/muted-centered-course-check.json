@@ -1,0 +1,21 @@
+{
+  "sample": "synthetic courses at viewport390",
+  "font": 15,
+  "nameWeight": 700,
+  "roomWeight": 600,
+  "white": true,
+  "noGlyphScale": true,
+  "longCenterOffsetMaxPx": 0.00002,
+  "shortRoom": "教5-103",
+  "shortRoomComplete": true,
+  "palette": [
+    "#9580BE",
+    "#C59662",
+    "#6EAA9B",
+    "#73A5B7",
+    "#AA83B8",
+    "#CB8EA2",
+    "#A0AB71",
+    "#7E9FCB"
+  ]
+}

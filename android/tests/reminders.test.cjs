@@ -1,0 +1,2 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {load,storage}=require('./load.cjs');
+test('reminder cleanup preserves notifications that are not registered to this module',async()=>{const canceled=[];const {exports:r}=load('src/core/remind.ts',{globals:{localStorage:storage()},mocks:{'@capacitor/local-notifications':{LocalNotifications:{getPending:async()=>({notifications:[{id:5000,channelId:'other'}]}),cancel:async o=>canceled.push(...o.notifications)}}}});await r.clearReminders();assert.equal(canceled.length,0)});

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- 常驻主题：窗口底色用纯色，不要用启动图。
+         用启动图会让任何一次窗口重绘（弹层、软键盘、WebView 重建）
+         从底下透出「白底 + 企鹅 + 福小外」的启动画面。 -->
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:background">@null</item>
+        <item name="android:windowBackground">@color/app_window_bg</item>
+    </style>
+
+    <!-- 后台登录窗口：整窗透明、不带动画，用户只看到登录页上的「正在登录」，看不到网页跳转。 -->
+    <style name="AppTheme.Silent" parent="AppTheme.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!--
+        启动主题，与鸿蒙 splash.png 同一套视觉：白底 + 居中圆形企鹅 logo + 底部「福小外」蓝字。
+        Android 12+ 只有系统 splash 这一条路（图标会被圆形遮罩裁切，所以用圆形图；
+        文字靠 windowSplashScreenBrandingImage 放到底部 24dp 区域），
+        低版本 Android 走 @capacitor/splash-screen 插件显示的 splash_full 整屏图。
+    -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FFFFFFFF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/splash_branding</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>
+</resources>

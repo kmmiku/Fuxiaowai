@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "synthetic": true,
+  "guest": true,
+  "wholeMessageRecognized": true,
+  "visibleAfterImport": true,
+  "visibleAfterReload": true
+}

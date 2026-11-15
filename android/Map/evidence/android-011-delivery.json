@@ -1,0 +1,10 @@
+{
+  "apk": "artifacts/福小外-Android-0.1.1.apk",
+  "type": "debug",
+  "package": "com.fuxiaowai.timetable",
+  "versionName": "0.1.1",
+  "versionCode": 3,
+  "bytes": 4542940,
+  "sha256": "15948e6babcb4be9ccebbf02b2325a8dcb0963bb39ad4c762dee454916a87697",
+  "signatureVerified": true
+}

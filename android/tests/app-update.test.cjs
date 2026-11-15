@@ -1,0 +1,33 @@
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),http=require('node:http');
+test('platform publications remain isolated, legacy Harmony remains compatible and invalid writes preserve data',async t=>{
+ const root=await fs.mkdtemp(path.join(os.tmpdir(),'fxw-update-')),tickets=path.join(root,'tickets');await fs.mkdir(tickets);
+ const json=(req,res,status,data)=>{res.writeHead(status,{'content-type':'application/json'});res.end(JSON.stringify(data));};
+ const admin=require('../server/admin-console').createAdminConsole({ROOT:root,TICKET_DIR:tickets,TTL_MS:86400000,PORT:0,BIND:'127.0.0.1',externalProbe:false,json,checkAuth:r=>r.headers.authorization==='test',needAuth:(r,s)=>json(r,s,401,{ok:false})});
+ const server=http.createServer(async(r,s)=>{if(!await admin.handle(r,s,new URL(r.url,'http://localhost')))json(r,s,404,{});});await new Promise(r=>server.listen(0,'127.0.0.1',r));
+ t.after(async()=>{await new Promise(r=>server.close(r));await admin.close();await fs.rm(root,{recursive:true,force:true});});
+ const base='http://127.0.0.1:'+server.address().port;
+ const request=(platform,method='GET',body,extra={})=>fetch(base+'/api/admin/app-update'+(platform?'?platform='+platform:''),{method,headers:{authorization:'test','content-type':'application/json',...extra},body:body===undefined?undefined:JSON.stringify(body)});
+ const harmony={versionCode:1000002,versionName:'0.1.2',content:'更新内容'.repeat(600)};
+ assert.equal((await request('harmony','PUT',harmony)).status,200);
+ const original=await (await request('')).json();
+ assert.equal((await request('android','PUT',{...harmony,versionCode:3,updateUrl:'https://example.com/app.apk'})).status,200);
+ assert.deepEqual(await (await request('')).json(),original);
+ assert.equal((await request('android','PUT',{...harmony,updateUrl:'http://example.com/app.apk'})).status,400);
+ assert.equal((await request('wrong')).status,400);
+ assert.equal((await request('android','PUT',null)).status,400);
+ assert.equal((await request('android','DELETE',undefined,{origin:'https://evil.example'})).status,403);
+ assert.equal((await fetch(base+'/api/admin/app-update?platform=android')).status,401);
+ const versionRoute=base+'/api/admin/app-version?platform=android';
+ assert.equal((await fetch(versionRoute)).status,401);
+ const save=await fetch(versionRoute,{method:'PUT',headers:{authorization:'test','content-type':'application/json'},body:JSON.stringify({versionCode:3,versionName:'1.2',updateUrl:'https://example.com/app.apk',content:'真实更新说明'})});
+ assert.equal(save.status,200);
+ const latest=(await save.json()).version;assert.equal(latest.content,'真实更新说明');
+ assert.equal((await fetch(versionRoute,{method:'PUT',headers:{authorization:'test','content-type':'application/json',origin:'https://evil.example'},body:'{}'})).status,403);
+ assert.equal((await request('android','DELETE')).status,200);
+ assert.deepEqual((await (await fetch(versionRoute,{headers:{authorization:'test'}})).json()).version,latest);
+ assert.equal((await (await fetch(base+'/api/admin/app-version?platform=harmony',{headers:{authorization:'test'}})).json()).version,null);
+
+ assert.equal((await (await request('android')).json()).release,null);
+ assert.deepEqual(await (await request('harmony')).json(),original);
+ const publicData=await (await fetch(base+'/api/app-update')).json();assert.deepEqual(publicData,original);
+});

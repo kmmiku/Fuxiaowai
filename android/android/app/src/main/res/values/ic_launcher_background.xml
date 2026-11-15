@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#5898F8</color>
+    <!-- WebView 背后的窗口底色：与 App 浅色主题背景一致。
+         不要放启动图，否则弹层/重绘时会从底下透出「白底 + 福小外」的启动画面。 -->
+    <color name="app_window_bg">#F6F7FB</color>
+</resources>

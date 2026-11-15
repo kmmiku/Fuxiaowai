@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "endpoint": "http://113.45.242.182",
+  "synthetic": true,
+  "codePrinted": false,
+  "courseMatches": true,
+  "generatedTicketCount": 1
+}

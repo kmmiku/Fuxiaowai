@@ -1,0 +1,19 @@
+{
+  "sample": "isolated synthetic timetable",
+  "beforeWeek": 11,
+  "afterWeek": 12,
+  "weekChanged": true,
+  "colorsSameAfterSwipe": true,
+  "colorsSameAfterReload": true,
+  "allThreePreloadedWeekGridsSameColors": true,
+  "persistedAutomaticColorIndices": [
+    5,
+    1,
+    2,
+    6,
+    4,
+    0,
+    3
+  ],
+  "manualOverrideRetained": true
+}

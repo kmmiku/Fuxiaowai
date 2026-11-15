@@ -1,0 +1,29 @@
+{
+  "options": [
+    "长乐校区",
+    "滨海校区"
+  ],
+  "labels": [
+    "日",
+    "新增课表",
+    "导入课表",
+    "分享课表",
+    "⋯"
+  ],
+  "calendar": {
+    "font": "15px",
+    "headerLine": "1px",
+    "rowLine": "1px"
+  },
+  "alignment": {
+    "weekday": "13px",
+    "badges": 0,
+    "errors": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "result": "PASS"
+}

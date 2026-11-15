@@ -1,0 +1,80 @@
+/* 外观设置 —— 对齐鸿蒙 AppearancePage.ets */
+
+.px-appearance {
+  background: var(--bg);
+}
+
+.pxa-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+
+.pxa-card {
+  margin: 0 var(--page-padding);
+  background: var(--card);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pxa-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.pxa-tap:active {
+  background: var(--chip);
+}
+
+.pxa-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pxa-title {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.pxa-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.pxa-value {
+  font-size: 11px;
+  color: var(--text-hint);
+  flex: 0 0 auto;
+}
+
+.pxa-arrow {
+  font-size: 18px;
+  line-height: 18px;
+  color: var(--text-hint);
+  flex: 0 0 auto;
+  margin-left: 4px;
+}
+
+.pxa-divider {
+  height: 1px;
+  margin-left: 16px;
+  background: var(--line);
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+
+.pxa-note {
+  margin: 10px 0 0;
+  padding: 0 20px;
+  font-size: 11px;
+  color: var(--text-hint);
+}

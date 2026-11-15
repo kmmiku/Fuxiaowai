@@ -1,0 +1,812 @@
+/* ============================================================
+   设置类页面（添加课程 / 上课时间 / 课表设置 / 切换学期 / 上课提醒）
+   按鸿蒙 entry/src/main/ets/pages 下的同名页面 1:1 还原。
+   仅本文件生效，不改 tokens.css / app.css / home.css / pages.css。
+   ============================================================ */
+
+/* ---------- 页面骨架 ---------- */
+
+.pxs-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.pxs-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: calc(60px + var(--safe-top));
+  padding: var(--safe-top) var(--page-padding) 0 8px;
+  background: var(--bg);
+}
+
+.pxs-head-52 {
+  height: calc(52px + var(--safe-top));
+}
+
+.pxs-back {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.pxs-back:active {
+  opacity: 0.6;
+}
+
+.pxs-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pxs-save {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 17px;
+  padding: 7px 16px;
+}
+
+.pxs-save:active {
+  background: var(--primary-deep);
+}
+
+.pxs-add {
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--primary);
+  padding: 8px;
+}
+
+.pxs-add:active {
+  opacity: 0.6;
+}
+
+.pxs-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px var(--page-padding) 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pxs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- 添加课程 ---------- */
+
+.pxs-err {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #b3261e;
+  background: #fbe3e2;
+  border-radius: 8px;
+  padding: 9px 12px;
+  margin-top: 10px;
+}
+
+:root[data-dark='true'] .pxs-err {
+  background: #331c1c;
+}
+
+.pxs-card {
+  background: var(--card);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  margin-top: 12px;
+}
+
+.pxs-scroll > .pxs-card:first-child,
+.pxs-err + .pxs-card {
+  margin-top: 0;
+}
+
+.pxs-field {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.pxs-field-label {
+  display: block;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pxs-input {
+  width: 100%;
+  height: 44px;
+  margin-top: 6px;
+  padding: 0 12px;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--chip);
+  border-radius: 12px;
+}
+
+.pxs-campus {
+  position: relative;
+  display: block;
+}
+
+.pxs-campus-trigger {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  padding-right: 34px;
+  text-align: left;
+}
+
+.pxs-campus-arrow {
+  position: absolute;
+  right: 12px;
+  top: calc(50% + 3px);
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid var(--text-sub);
+  pointer-events: none;
+}
+
+.pxs-field-row {
+  display: flex;
+  gap: 10px;
+}
+
+.pxs-field-row > .pxs-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.pxs-sec {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pxs-sec-title {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+  flex: 0 0 auto;
+}
+
+.pxs-sec-hint {
+  margin-left: auto;
+  max-width: 62%;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-hint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pxs-days {
+  display: flex;
+  gap: 5px;
+}
+
+.pxs-day {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 0;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--text-sub);
+  background: var(--chip);
+  border-radius: 9px;
+}
+
+.pxs-day[data-on='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* 步进器 */
+
+.pxs-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.pxs-spin {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.pxs-spin-btn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text);
+  background: var(--chip);
+  border-radius: 10px;
+}
+
+.pxs-spin-plus {
+  font-size: 18px;
+}
+
+.pxs-spin-btn:disabled {
+  color: var(--text-hint);
+}
+
+.pxs-spin-btn:active:not(:disabled) {
+  opacity: 0.65;
+}
+
+.pxs-spin-val {
+  width: 46px;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.pxs-spin-label {
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pxs-spin-label-w40 {
+  width: 40px;
+}
+
+.pxs-spin-label-w28 {
+  width: 28px;
+}
+
+.pxs-spin-gap {
+  flex: 1;
+  min-width: 0;
+}
+
+.pxs-time {
+  width: 100%;
+  min-height: 16px;
+  margin-top: 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-hint);
+}
+
+.pxs-mini-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pxs-chip {
+  flex: 0 0 auto;
+  padding: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-sub);
+  background: var(--chip);
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.pxs-chip[data-on='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* 颜色 */
+
+.pxs-colors {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pxs-color {
+  position: relative;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.pxs-color-ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+}
+
+.pxs-color-dot {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+}
+
+.pxs-err-bottom {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e8453c;
+  padding: 10px 0 0 4px;
+}
+
+.pxs-note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-hint);
+  padding: 12px 4px calc(20px + var(--safe-bottom));
+}
+
+/* ---------- 上课时间 ---------- */
+
+.pxs-sub {
+  flex: 0 0 auto;
+  padding: 0 0 8px 20px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-hint);
+}
+
+.pxs-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 var(--page-padding) 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.pxs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.pxs-item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  height: 58px;
+  padding: 0 14px 0 8px;
+  background: var(--card);
+  border-radius: 14px;
+}
+
+.pxs-item-index {
+  flex: 0 0 34px;
+  width: 34px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.pxs-item-title {
+  flex: 0 0 auto;
+  margin-right: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.pxs-timeinput {
+  position: relative;
+  flex: 0 0 68px;
+  width: 68px;
+  height: 30px;
+  padding: 0 2px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--text);
+  background: var(--chip);
+  border-radius: 8px;
+  color-scheme: light;
+}
+
+:root[data-dark='true'] .pxs-timeinput {
+  color-scheme: dark;
+}
+
+.pxs-timeinput::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pxs-dash {
+  flex: 0 0 10px;
+  width: 10px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-hint);
+}
+
+.pxs-del {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 30px;
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-hint);
+}
+
+.pxs-del:disabled {
+  opacity: 0.35;
+}
+
+.pxs-foot {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+  padding: 10px var(--page-padding) calc(16px + var(--safe-bottom));
+}
+
+.pxs-btn {
+  flex: 1;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1.2;
+  border-radius: 999px;
+}
+
+.pxs-btn-ghost {
+  background: var(--chip);
+  color: var(--text-sub);
+}
+
+.pxs-btn-primary {
+  flex: 2;
+  background: var(--primary);
+  color: #fff;
+}
+
+.pxs-btn:active {
+  opacity: 0.9;
+}
+
+/* ---------- 课表设置 ---------- */
+
+.pxs-card-flat {
+  flex: 0 0 auto;
+  margin: 0 var(--page-padding);
+  background: var(--card);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pxs-card-gap {
+  margin-top: 12px;
+}
+
+.pxs-srow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.pxs-srow-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.pxs-srow-title {
+  font-size: 15px;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.pxs-srow-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-hint);
+}
+
+.pxs-line {
+  height: 1px;
+  margin-left: 16px;
+  background: var(--line);
+  transform: scaleY(0.5);
+  transform-origin: top;
+}
+
+.pxs-block-head {
+  padding: 12px 16px 8px;
+}
+
+.pxs-density {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+}
+
+.pxs-dchip {
+  flex: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--text-sub);
+  background: var(--chip);
+  border-radius: 10px;
+}
+
+.pxs-dchip[data-on='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ---------- 切换学期 ---------- */
+
+.pxs-term-card {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 var(--page-padding);
+  padding: 16px;
+  background: var(--card);
+  border-radius: 16px;
+}
+
+/* .pxs-term-card 的 margin 简写会覆盖 .pxs-card-gap，这里补回 12px 间距 */
+.pxs-term-card.pxs-card-gap {
+  margin-top: 12px;
+}
+
+.pxs-term-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.pxs-term-kicker {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-hint);
+}
+
+.pxs-term-name {
+  margin-top: 4px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.pxs-term-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pxs-badge {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--primary);
+  background: var(--today-bg);
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.pxs-sync-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.pxs-sync-btn {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1.2;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pxs-sync-btn:disabled {
+  opacity: 0.6;
+}
+
+.pxs-sync-label {
+  flex: 0 0 auto;
+  padding: 10px 20px 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-sub);
+}
+
+.pxs-term-note {
+  flex: 0 0 auto;
+  padding: 16px 20px 0;
+  font-size: 11px;
+  line-height: 19px;
+  color: var(--text-hint);
+}
+
+/* ---------- 上课提醒 ---------- */
+
+.pxs-rem-card {
+  flex: 0 0 auto;
+  margin: 0 var(--page-padding);
+  background: var(--card);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pxs-rem-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.pxs-rem-row[data-off='true'] {
+  opacity: 0.4;
+}
+
+.pxs-rem-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pxs-rem-chip {
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-sub);
+  background: var(--chip);
+  border-radius: 9px;
+  white-space: nowrap;
+}
+
+.pxs-rem-chip[data-on='true'] {
+  background: var(--primary);
+  color: #fff;
+}
+
+.pxs-rem-note {
+  flex: 0 0 auto;
+  padding: 16px 20px calc(16px + var(--safe-bottom));
+  font-size: 11px;
+  line-height: 19px;
+  color: var(--text-hint);
+}
+/* 课表设置：半透明面板 + 背后实时预览（对齐鸿蒙） */
+.pxs-page-preview {
+  position: relative;
+}
+.pxs-preview {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  padding: 64px 12px 0;
+  overflow: hidden;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+.pxs-sheet {
+  position: relative;
+  z-index: 1;
+  transition: opacity 220ms ease;
+  padding-bottom: 14px;
+}
+.pxs-live {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--primary);
+  padding-right: 4px;
+}
+.pxs-srow-value {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+.pxs-range {
+  width: 100%;
+  margin: 12px 0 4px;
+  accent-color: var(--primary);
+}
+.pxs-tip {
+  padding: 14px 6px 0;
+  font-size: 11px;
+  color: var(--text-hint);
+  line-height: 1.6;
+}
+
+/* 按本周生成提醒（对齐鸿蒙 RemindPage） */
+.pxs-rem-gen {
+  width: 100%;
+  height: 46px;
+  border-radius: 12px;
+  border: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(90deg, var(--primary) 0%, #6e8bff 100%);
+  cursor: pointer;
+}
+
+.pxs-rem-gen:disabled {
+  opacity: 0.55;
+}
+
+.pxs-rem-hint {
+  margin: 0 calc(var(--page-padding) + 4px) 12px;
+  font-size: 11px;
+  line-height: 17px;
+  color: var(--text-sub);
+}
+
+/* 上课时间行内「开始 / 结束」小标签 */
+.pxs-tl {
+  flex: none;
+  font-size: 10px;
+  color: var(--fx-muted, #9AA0A8);
+  letter-spacing: 0.04em;
+}
+.pxs-item .pxs-tl:first-of-type { margin-left: 2px; }
+
+/* 切换学期页：验证码未过时的跳转按钮 */
+.pxs-captcha-go { margin-top: 12px; }

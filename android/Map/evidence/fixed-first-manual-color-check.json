@@ -1,0 +1,18 @@
+{
+  "sample": "isolated synthetic seven-day courses, browser edit/save/reload",
+  "defaultFirstCourseColors": [
+    "rgb(241, 39, 84)",
+    "rgb(240, 104, 128)",
+    "rgb(16, 192, 176)",
+    "rgb(40, 152, 240)",
+    "rgb(160, 120, 248)"
+  ],
+  "swatchCount": 8,
+  "manualChoice": {
+    "day": 1,
+    "index": 5,
+    "colorOverride": true,
+    "colorAfterReload": "rgb(245, 162, 61)"
+  },
+  "priority": "explicit manual > weekday first default > automatic neighbor coloring"
+}
