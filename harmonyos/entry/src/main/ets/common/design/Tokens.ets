@@ -56,22 +56,22 @@ export function TC(dark: boolean): ThemeColors {
   return dark ? DARK : LIGHT;
 }
 
-/** 课程色板： [浅底, 主色] */
+/** 与安卓课程块一致的色板：[浅底, 实心卡片色] */
 export const COURSE_COLORS: string[][] = [
-  ['#EDEBFD', '#7C6CF0'],
-  ['#FDF0E3', '#E8892B'],
-  ['#E6F6EE', '#2FA36B'],
-  ['#E5F4F8', '#2B9BB5'],
-  ['#F3E8FA', '#9B59C9'],
-  ['#FCE9EE', '#E46A8B'],
-  ['#F2F6DF', '#8AA61F'],
-  ['#E8F0FD', '#3D7EDB']
+  ['#FDEBF0', '#F12754'],
+  ['#FCEBF0', '#F06880'],
+  ['#E6F8F5', '#10C0B0'],
+  ['#E9F0FF', '#3080F8'],
+  ['#F1EBFE', '#A078F8'],
+  ['#FFF1E2', '#F5A23D'],
+  ['#E8F4FE', '#2898F0'],
+  ['#E8F1FD', '#1773CF']
 ];
 
 export class Metric {
   static readonly pagePadding: number = 12;
   static readonly cardRadius: number = 20;
-  static readonly blockRadius: number = 8;
+  static readonly blockRadius: number = 5;
   static readonly cellHeight: number = 52;   // 每节课行高
   static readonly timeColWidth: number = 38; // 左侧时间轴宽度
   static readonly gap: number = 12;

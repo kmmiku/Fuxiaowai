@@ -44,6 +44,16 @@ export class CourseRepositoryImpl implements CourseRepository {
     await Db.transaction(async () => { this.checkAccount(account); await CourseDao.insertOne(tableId, course, account); this.checkAccount(account); });
   }
 
+  async update(course: Course, tableId: string): Promise<void> {
+    validateCourses([course]);
+    const account: string = Db.accountUser();
+    await Db.transaction(async () => {
+      this.checkAccount(account);
+      await CourseDao.updateOne(tableId, course, account);
+      this.checkAccount(account);
+    });
+  }
+
   async remove(courseId: string): Promise<void> {
     const account: string = Db.accountUser();
     await Db.transaction(async () => { this.checkAccount(account); await CourseDao.remove(courseId, account); this.checkAccount(account); });

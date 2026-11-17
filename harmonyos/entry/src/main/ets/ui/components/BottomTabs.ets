@@ -33,8 +33,8 @@ export struct BottomTabs {
     this.alive = false;
   }
 
-  private items: string[] = ['校历', '课程', '我的成绩', '我的'];
-  private icons: string[] = ['calendar', 'book', 'award', 'user'];
+  private items: string[] = ['校历', '课程', '工作台', '我的'];
+  private icons: string[] = ['calendar', 'book', 'toolbox', 'user'];
 
   private press(i: number): void {
     animateTo({ duration: 90, curve: Curve.FastOutSlowIn }, () => {
@@ -74,7 +74,7 @@ export struct BottomTabs {
   }
 
   private navigate(i: number): void {
-    const pages: string[] = ['pages/AcademicCalendar', 'pages/Index', 'pages/GradePage', 'pages/ProfilePage'];
+    const pages: string[] = ['pages/AcademicCalendar', 'pages/Index', 'pages/WorkbenchPage', 'pages/ProfilePage'];
     router.replaceUrl({ url: pages[i] }).catch(() => {
       if (!this.alive) { return; }
       this.selected = this.current;

@@ -45,6 +45,8 @@
 
 [ShareApi](../../entry/src/main/ets/data/remote/ShareApi.ets)的SHARE_BASE为http://113.45.242.182（分享），FEEDBACK_BASE为https://fuxiaowai.xyz（反馈），独立@ohos.net.http请求；[Index](../../entry/src/main/ets/pages/Index.ets)调用uploadShare/fetchShare；处理端是[server.js](../../server/server.js)的http.createServer路由闭包（未拆命名控制器）。
 
+[download-center/server.js](../../server/download-center/server.js) 是独立只读静态服务，默认监听 `0.0.0.0:18080`，仅 `GET/HEAD /`、`/index.html`、`/icon.png`、`/android-logo.jpg` 和 `/harmony-logo.jpg`；其他路径404、其他方法405。页面是 [download-center/index.html](../../server/download-center/index.html)，公网访问形式 `http://<VPS公网IP>:18080/`；Android 与 HarmonyOS 按钮分别直达用户提供的蓝奏云页面并附 `pwd` 查询参数，提取码在页面明示；HarmonyOS 卡片提示用户将下载文件后缀改为 `.hap` 后安装。蓝奏云网页是否原生据该参数自动填码未确认。两个平台标志取自用户提供的左右并列图，经裁切为独立 JPEG 静态资源。该服务无数据库、登录或指向分享接口的调用。2026-11-16 更新后通过 SFTP 读回确认两条链接、`.hap` 提示和平台图标资源；本地/VPS `server.js`、`index.html`、两个 JPEG 的 SHA-256 均匹配，下载服务与原分享服务均 active。先前外网探测代理返回502、直连无HTTP响应，其他网络可达性及云安全组/备案影响待确认。
+
 | 接口 | 契约 |
 | --- | --- |
 | POST /api/share | JSON {courses,periods,term,week}；200 {ok:true,code,expiresAt}。validShare要求courses 1..800；name非空≤300；id/teacher/room/campus可选≤300；weekday1..7，start/endPeriod1..48且有序，weeks≤60项且每项1..60，colorIndex可选0..255。term可选≤200，week可选0..60；periods可选≤48，index1..48、start/end为HH:mm；readBody上限64KiB |
@@ -113,3 +115,29 @@ ShareApi.SHARE_BASE 改为 `http://113.45.242.182`，仅 uploadShare/fetchShare 
 ZhengfangAuth.postTimetable 返回 RawResponse，识别认证跳转并有限处理同jw的/kbcx/业务跳转（最多3，307/308保留方法/表单）；fetchTimetable 在认证重定向或200登录表单时仅一次mint+课表重试，不再加载首页菜单。HTTP200且合法JSON/kbList数组才放行。CasTicket.follow 返回 TicketLanding（host/path），支持实际origin/priorPath/token，最多6跳；resolveTarget只信任portal/jw且不降级HTTPS；mint/CasAuth.submit以有效业务落地和可发送课表Cookie判断。诊断只输出状态及固定类别，真实学校响应待确认。
 
 问题证据与验证边界见 [Solution.md 的302问题](../../Solution.md)。
+
+## 2026-11-15｜应用更新
+UpdateCheck.checkForUpdate(context, uiContext, automatic) 调用 AppGalleryKit.updateManager.checkAppUpdate，仅市场判定有新版才获取 HTTPS /api/app-update。GET返回{ok,release:null|{versionCode,versionName,content,publishedAt}}；后台 GET/PUT/DELETE /api/admin/app-update 复用 Basic 认证及写操作 sameOrigin。PUT 校验正整数versionCode、数字版本名称与≤2500字内容，临时文件原子rename。DELETE撤回。无公告/读取失败时使用通用说明且不提供按版本忽略。立即更新调用showUpdateDialog。线上部署与真实市场升级待确认。
+
+2026-11-15后续：版本发布后台已实际增量部署四个管理文件，发布/撤回/认证/同源校验通过；服务器经公网域名HTTPS的健康和公告接口均200，本机Windows直连TLS握手异常待确认。备份及回滚见根Solution.md“更新后台线上部署验收”。tools/deploy-app-update.py是有副作用的部署脚本，不自动运行。真实商店升级仍待确认。
+
+## 2026-11-15 登录去重统计
+Locator.persist成功且AccountScope有效 → UserMetrics.reportLoginMetric → POST /api/user-metrics/login，JSON仅studentId，当前HTTP IP、注释HTTPS域名；5秒超时、无队列无请求日志。server/user-metrics.js内存HMAC、服务器密钥、摘要原子去重，不存原学号。GET /api/admin/users需后台认证，只返回total/daily(近30日北京时间)/users(序号及首次日期)，offset分页50。HTTP传输与客户端上报可伪造边界见根Solution.md；不等于学校认证人数证明。
+
+2026-11-15更新：/api/admin/users.daily现在固定7日；users仅userId(两位起递增字符串)/registeredAt(本地格式时间，历史仅日期)，移除note。
+
+2026-11-16工作台：成绩/考试为原生内部页；自主选课JW N253512入口，四六级passport.neea.edu.cn/CETLogin与iam.neea.edu.cn/login.html入口，官网www.fzfu.com。WebView仅JW精确域注入教务Cookie，其他站点独立认证。接口真实业务验收待确认，不恢复安卓已删除的其他25项服务或附加SSO。
+
+2026-11-16工作台：官网https://www.fzfu.com/与考试院passport.neea.edu.cn/CETLogin、iam.neea.edu.cn/login.html使用自身网页会话；自主选课JW /jwglxt/xsxk/zzxkyzb_cxZzxkYzbIndex.html?gnmkdm=N253512&layout=default仅该入口注入现有JW Cookie。ServiceWebPage限制初始入口；未核实所有远端跳转或真实业务提交。考试仍fetchExams(xnm,xqm)单页100，未新增网络认证协议。
+
+2026-11-16 联网北京时间：ClockSync仅请求https://www.fzfu.com/ HEAD，保持TLS验证，不发送Cookie/账号。接受200且有效Date，拒绝Age非0与超10秒请求；失败静默。官网本机已验证Date，模拟器结果见Solution。
+
+2026-11-16：下载页两个平台图标改为 HTML 内嵌 JPEG data URI，浏览器无需单独请求图片路径；图片内容沿用用户提供的左右图标裁切。
+
+2026-11-16：Android 与 HarmonyOS 下载入口更新为用户本轮提供的新链接；静态 HTML 已同步 VPS，VPS 本机 HTTP 返回内容与本地 SHA-256 一致，两个链接及内嵌图标标记已核对。
+
+2026-11-16：下载页在两张下载卡片之后、第三方提示之前新增 QQ 反馈卡片；用户提供的二维码随 HTML 内嵌，提供保存图片和复制群号（HTTP 下使用 execCommand 后备，失败显示手动复制提示）。已部署并确认 VPS 本机 HTTP 返回与本地 HTML 哈希一致。浏览器交互结果另见实际验收，未验证移动端 QQ 识别及加群。
+
+2026-11-16：反馈卡片的保存二维码按钮替换为用户提供的 QQ 加群链接按钮，新窗口打开；保留内嵌二维码和复制群号。已部署，VPS 本机 HTTP 页面与本地哈希一致；真实 QQ 唤起及加群结果待用户验收。地图不记录链接中的授权参数。
+
+2026-11-17：鸿蒙下载入口更新为用户本轮提供的新蓝奏云链接，保留提取码参数；已同步 VPS，VPS 本机 HTTP 返回与本地 HTML 哈希一致，安卓入口保持原值。

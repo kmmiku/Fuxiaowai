@@ -1,5 +1,7 @@
 # 数据库与持久化地图
 
+2026-11-15 课程颜色迁移补充：`Db.SQL_COURSE` 新增 `color_override INTEGER NOT NULL DEFAULT 0`，已有库由 `migrateCourseColors()` 事务式补列；`CourseDao` 读写此列，`updateOne()` 按账号、课表、原课程 ID 精确更新，影响行数非 1 报错。`CourseRepositoryImpl.update()` 在账号检查和事务中调用。原有 `color_index` 保留；未显式手选色的课程仍可用工作日首课默认色。
+
 更新日期：2026-11-14。静态源码核对；没有打开用户数据库或生产数据，没有构建、测试或网络验证。设备绝对沙箱目录、生产FXW_ROOT及实际留存情况待确认。
 
 导航：[总览](README.md) · [API](API_MAP.md) · [模块](MODULE_MAP.md) · [状态](STATE_MAP.md) · [构建](BUILD_MAP.md)。<ctx.filesDir>/<ctx.cacheDir>表示运行时Context目录。
@@ -96,3 +98,29 @@ Db SQL/迁移/认领、DAO账号筛选/id、仓储事务、Store key/schema、�
 ## 2026-11-14｜游客覆盖与节次写队列
 
 CourseRepository.replaceAll(tableId,courses,clearGuest?,accountToken?,canCommit?) 在原事务内校验数据、替换目标课表；clearGuest 且当前账号非空时删除 account_id 空的课程与 id 非 t1 的游客课表，提交前复查 token/操作回调。失败不丢游客与原账号课表。TimetableStateStore.discardGuest 过滤 activeTables 空账号键与 terms 的空账号组合键，保留已登录账号；saveTerm 增加可选 token/操作回调。PeriodStore.save 增加 token/操作回调与 SerialQueue，避免旧导入在学校重置节次后写回。退出仍删除全部课程、分享偏好等，未改为保留游客数据。
+
+## 2026-11-15｜更新偏好和公告
+客户端preferences fxw_app_update保存ignoredVersion（number），只影响自动提示，与账号无关，普通登出保留。服务器ROOT/admin/app-update.json独立于旧release/release.json，保存versionCode/versionName/content/publishedAt；撤回删除该公告文件，不修改安装包或口令。
+
+2026-11-15后续：版本发布后台已实际增量部署四个管理文件，发布/撤回/认证/同源校验通过；服务器经公网域名HTTPS的健康和公告接口均200，本机Windows直连TLS握手异常待确认。备份及回滚见根Solution.md“更新后台线上部署验收”。tools/deploy-app-update.py是有副作用的部署脚本，不自动运行。真实商店升级仍待确认。
+
+登录统计：ROOT/user-metrics/users.json仅digest/day；.hmac-key为32字节服务器随机密钥，文件0600/目录0700；不存学号，首次日期按北京时间。密钥与数据受限备份，丢失密钥会破坏跨重启去重。
+
+2026-11-15：用户统计新记录增加userId递增整数、registeredAt时间戳；旧记录保留摘要及日期，显示时用原插入顺序补ID，不捏造分钟。
+
+2026-11-16：preferences fxw_workbench键favorites:<account>保存服务索引0..4数组，去重过滤；fxw_exam_cache键<account>:<xnm>:<xqm>保存ExamRecord[]，成功请求写入，失败保留；clearPersonalData清两存储。键内账号不得输出日志。
+
+
+2026-11-16 格子宽度：SettingsStore.app_settings 新增 blockWidthScale，缺字段默认1，加载夹到0.875～1.25；保存相对比例，设置页按实际布局显示vp。
+
+2026-11-16 宽度重叠修正：上条0.875～1.25范围已替换为0.875～1；SettingsStore.load夹回旧超限值，TimetableGrid.blockW按子列unit-1设上限（移除14vp最小宽导致的多列越界）。设置页P1布局为格子高度/格子宽度、下方灰色vp、蓝色滑块，无底部范围文字；宽度0.1vp步进。原背景/面板opacity未改。
+
+2026-11-16 安卓列宽方案替换此前卡片缩放方案：SettingsStore.cellWidth取代旧blockWidthScale，0自动，旧数据无cellWidth忽略旧缩放并恢复自动；有效手动值夹45～55vp，保留小数。tests/settings-width.cjs覆盖旧数据、边界、保存重载。
+
+2026-11-16 安卓最新自适应/课程文字/日视图迁移（替换此前宽度方案）：SettingsStore新增cellWidthRatio（0自动，有限正数夹0.8～1）；旧cellWidth继续有限正数夹1～55兼容读取，渲染受实际列宽约束，不主动写盘。设置页下一次保存写比例、旧宽度置0，不清账号课表。
+
+2026-11-16 安卓最终方案同步：SettingsStore新增cellWidthRatio：0自动，有限正数夹0.8～1；cellWidth兼容旧绝对值仅作读取，渲染夹到当前实测范围；设置页保存比例后cellWidth置0。未清课程/账号，不新增权限。
+
+2026-11-16 工作台常用功能退役：WorkbenchPage删除LongPressGesture、菜单遮罩、添加/移除/查看常用、WorkbenchFavorites弹层及preferences读写/状态。五项服务及官网点击入口不变。PrivacyDocPage删除常用收集条目，ServiceLocator仍清理旧fxw_workbench数据以兼容历史版本；不自动清除用户其他数据。
+
+2026-11-17 成绩/考试按安卓当前开发日志复刻：ExamPage在既有fxw_exam_cache中按selection:<账号>保存选中学期索引；既有按账号年学期考试缓存不变，退出清理沿用。成绩存储未改。

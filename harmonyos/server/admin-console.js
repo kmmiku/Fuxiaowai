@@ -170,6 +170,28 @@ function createAdminConsole(options){
  function alertPayload(){return {ok:true,time:Date.now(),sampledAt:latest?.sampledAt||null,storageError,active:[...active.values()],rows:[...events].reverse().slice(0,200),thresholds:{cpu:90,mem:90,disk:90,consecutiveSamples:3,certificateDays:14}};}
  async function handle(req,res,url){
   const p=url.pathname;
+  if(p==='/api/app-update'||p==='/api/admin/app-update'){
+   const publicRead=p==='/api/app-update',file=path.join(dir,'app-update.json');
+   res.setHeader('Cache-Control','no-store');
+   if(!publicRead&&!checkAuth(req)){needAuth(req,res);return true;}
+   if(!publicRead&&!['GET','HEAD'].includes(req.method)&&!sameOrigin(req)){json(req,res,403,{ok:false,msg:'拒绝跨站管理操作'});return true;}
+   try{
+    if(req.method==='GET'){
+     let release=null;try{release=JSON.parse(await fsp.readFile(file,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+     json(req,res,200,{ok:true,release});return true;
+    }
+    if(!publicRead&&req.method==='PUT'){
+     const b=await readJson(req);
+     if(!Number.isSafeInteger(b.versionCode)||b.versionCode<1||b.versionCode>2147483647||typeof b.versionName!=='string'||!/^\d+(?:\.\d+){1,3}$/.test(b.versionName)||b.versionName.length>40||typeof b.content!=='string'||!b.content.trim()||b.content.length>2500){json(req,res,400,{ok:false,msg:'版本号或更新内容无效（内容最多2500字）'});return true;}
+     const release={versionCode:b.versionCode,versionName:b.versionName,content:b.content.trim(),publishedAt:Date.now()};
+     const tmp=file+'.'+crypto.randomBytes(8).toString('hex')+'.tmp';
+     try{await fsp.writeFile(tmp,JSON.stringify(release),{mode:0o600,flag:'wx'});await fsp.rename(tmp,file);}finally{await fsp.unlink(tmp).catch(()=>{});}
+     record('update.publish',String(b.versionCode));json(req,res,200,{ok:true,release});return true;
+    }
+    if(!publicRead&&req.method==='DELETE'){await fsp.unlink(file).catch(e=>{if(e.code!=='ENOENT')throw e;});record('update.withdraw');json(req,res,200,{ok:true});return true;}
+    json(req,res,405,{ok:false,msg:'请求方法不支持'});return true;
+   }catch(e){json(req,res,e.status||500,{ok:false,msg:'版本公告读取或保存失败'});return true;}
+  }
   const asset=p==='/admin/admin.js'||p==='/admin/admin.css';
   const endpoint=['/api/admin/inspect','/api/admin/ticket-search','/api/admin/probes','/api/admin/alerts','/api/admin/audit'].includes(p);
   const adminWrite=p.startsWith('/api/admin/')&&!['GET','HEAD','OPTIONS'].includes(req.method);

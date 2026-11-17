@@ -9,6 +9,7 @@ import { currentWeek, TOTAL_WEEKS } from '../common/util/TermCalendar';
 import { TimetableGrid } from '../ui/components/TimetableGrid';
 import common from '@ohos.app.ability.common';
 import router from '@ohos.router';
+import { effectiveWidth, widthMin, widthMax } from '../common/util/CellWidth';
 
 /**
  * 课表设置：格子高度与块宽度都用无极滑块调，拖动时面板变透、背后课表实时跟着变，
@@ -27,6 +28,9 @@ struct TimetableSettings {
   @State dragging: boolean = false;
   /** 拖动过程中的临时值，松手才写进设置 */
   @State liveCell: number = 52;
+  @State baseWidth: number = 1;
+  @State liveRatio: number = 0;
+  @State legacyWidth: number = 0;
   private ctx: common.UIAbilityContext | null = null;
 
   aboutToAppear(): void {
@@ -36,6 +40,8 @@ struct TimetableSettings {
     SettingsStore.load(this.ctx).then((v: AppSettings) => {
       this.s = v;
       this.liveCell = v.cellHeight;
+      this.liveRatio = v.cellWidthRatio;
+      this.legacyWidth = v.cellWidth;
     });
     this.loadCourses();
   }
@@ -54,6 +60,12 @@ struct TimetableSettings {
 
   private persist(): void {
     if (this.ctx) {
+      if (this.baseWidth > 1) {
+        this.liveRatio = this.liveWidth() / this.baseWidth;
+        this.s.cellWidthRatio = this.liveRatio;
+        this.s.cellWidth = 0;
+        this.legacyWidth = 0;
+      }
       SettingsStore.save(this.ctx, this.s);
     }
   }
@@ -75,6 +87,22 @@ struct TimetableSettings {
   }
 
 
+  private widthMin(): number { return widthMin(this.baseWidth); }
+  private widthMax(): number { return widthMax(this.baseWidth); }
+  private liveWidth(): number { return effectiveWidth(this.baseWidth, this.liveRatio, this.legacyWidth); }
+  private onWidthChange(v: number, mode: SliderChangeMode): void {
+    this.liveRatio = Math.max(0.8, Math.min(1, v / this.baseWidth));
+    this.legacyWidth = 0;
+    if (mode === SliderChangeMode.End || mode === SliderChangeMode.Click) {
+      this.s.cellWidthRatio = this.liveRatio;
+      this.s.cellWidth = 0;
+      this.dragging = false;
+      this.persist();
+    } else {
+      this.dragging = true;
+    }
+  }
+
   build() {
     Stack({ alignContent: Alignment.TopStart }) {
       // ── 底层：真实课表，拖动时变清晰，松手回到淡淡一层 ──
@@ -86,15 +114,20 @@ struct TimetableSettings {
             showWeekend: true,
             periods: this.periods,
             cellHeight: this.liveCell,
+            cellWidth: this.legacyWidth,
+            cellWidthRatio: this.liveRatio,
+            onBaseBlockWidth: (width: number) => { this.baseWidth = width; },
             dark: this.dark,
             onCourseTap: (c: Course) => {}
           })
         }
       }
       .width('100%')
+      .alignItems(HorizontalAlign.Start)
       .height(this.liveCell * 12 + 16)
-      .padding({ left: 6, right: 6 })
+      .padding({ left: Metric.pagePadding, right: Metric.pagePadding })
       .margin({ top: 56 })
+      .clip(true)
       .opacity(this.dragging ? 1 : 0.5)
       .animation({ duration: 160, curve: Curve.EaseOut })
 
@@ -132,52 +165,34 @@ struct TimetableSettings {
         .margin({ left: Metric.pagePadding, right: Metric.pagePadding })
 
         Column() {
-          // 格子高度
-          Row() {
-            Text('课表格子高度')
-              .fontSize(15)
-              .fontColor(TC(this.dark).text)
-            Blank()
-            Text(`${this.liveCell} vp`)
-              .fontSize(Font.body)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(Palette.primary)
-          }
-          .width('100%')
-
-          Slider({
-            value: this.liveCell,
-            min: CELL_MIN,
-            max: CELL_MAX,
-            step: 1,
-            style: SliderStyle.OutSet
-          })
-            .width('100%')
-            .blockColor(Color.White)
-            .trackColor(TC(this.dark).chip)
-            .selectedColor(Palette.primary)
-            .margin({ top: 6 })
+          Text('格子高度').fontSize(15).fontColor(TC(this.dark).text)
+            .width('100%').padding({ left: 16, right: 16 })
+          Text(`${this.liveCell} vp`).fontSize(Font.small).fontColor(TC(this.dark).textSub)
+            .width('100%').padding({ left: 16, right: 16 }).margin({ top: 2 })
+          Slider({ value: this.liveCell, min: CELL_MIN, max: CELL_MAX,
+            step: 1, style: SliderStyle.OutSet })
+            .width('100%').blockColor(Palette.primary).trackColor(TC(this.dark).chip)
+            .selectedColor(Palette.primary).margin({ top: 18 })
             .onChange((v: number, mode: SliderChangeMode) => this.onCellChange(v, mode))
-
-          Row() {
-            Text(`${CELL_MIN}`)
-              .fontSize(Font.tiny)
-              .fontColor(TC(this.dark).textHint)
-            Blank()
-            Text('一行能看到的课更少 / 更多')
-              .fontSize(Font.tiny)
-              .fontColor(TC(this.dark).textHint)
-            Blank()
-            Text(`${CELL_MAX}`)
-              .fontSize(Font.tiny)
-              .fontColor(TC(this.dark).textHint)
-          }
-          .width('100%')
         }
-        .width('100%')
-        .padding({ left: 16, right: 16, top: 14, bottom: 16 })
-        .backgroundColor(TC(this.dark).card)
-        .borderRadius(16)
+        .width('100%').padding({ top: 14, bottom: 4 })
+        .backgroundColor(TC(this.dark).card).borderRadius(16)
+        .margin({ left: Metric.pagePadding, right: Metric.pagePadding, top: 12 })
+
+        Column() {
+          Text('格子宽度').fontSize(15).fontColor(TC(this.dark).text)
+            .width('100%').padding({ left: 16, right: 16 })
+          Text(`${this.liveWidth().toFixed(1)} vp`)
+            .fontSize(Font.small).fontColor(TC(this.dark).textSub)
+            .width('100%').padding({ left: 16, right: 16 }).margin({ top: 2 })
+          Slider({ value: this.liveWidth(),
+            min: this.widthMin(), max: this.widthMax(), step: 0.1, style: SliderStyle.OutSet })
+            .width('100%').blockColor(Palette.primary).trackColor(TC(this.dark).chip)
+            .selectedColor(Palette.primary).margin({ top: 18 })
+            .onChange((v: number, mode: SliderChangeMode) => this.onWidthChange(v, mode))
+        }
+        .width('100%').padding({ top: 14, bottom: 4 })
+        .backgroundColor(TC(this.dark).card).borderRadius(16)
         .margin({ left: Metric.pagePadding, right: Metric.pagePadding, top: 12 })
 
         Blank()

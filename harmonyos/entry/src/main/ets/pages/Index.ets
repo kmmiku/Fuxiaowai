@@ -1,5 +1,6 @@
+import { BeijingClock } from '../common/util/BeijingClock';
 import { Font, Metric, Palette, TC } from '../common/design/Tokens';
-import { Course, DEFAULT_PERIODS, Period, isInWeek } from '../domain/model/Course';
+import { Course, DEFAULT_PERIODS, Period, isInWeek, displayedColorIndex } from '../domain/model/Course';
 import { TimetableInfo } from '../domain/repository/CourseRepository';
 import { currentWeek, weekDates, weekRangeLabel, getTermConfig, TOTAL_WEEKS } from '../common/util/TermCalendar';
 import { TimetableStateStore, refreshOwnedReminders, resolveSchoolTerm } from '../data/local/TimetableStateStore';
@@ -30,7 +31,7 @@ import { AppSettings, DENSITY_HEIGHT, DEFAULT_SETTINGS, SettingsStore } from '..
 import pasteboard from '@ohos.pasteboard';
 import hilog from '@ohos.hilog';
 import preferences from '@ohos.data.preferences';
-import { MOCK_COURSES } from '../data/mock/MockData';
+import { LEGACY_DEMO_ID_HASHES, legacyDemoIdHash } from '../data/mock/MockData';
 import { WidgetRefresh } from '../widget/WidgetRefresh';
 import { AccountScope } from '../common/util/AccountScope';
 import { checkForUpdate } from '../common/util/UpdateCheck';
@@ -38,6 +39,24 @@ import { checkForUpdate } from '../common/util/UpdateCheck';
 /** 清除旧版本内置演示课表的一次性标记（存在 preferences 文件 fxw_migrate） */
 const MIGRATE_FILE: string = 'fxw_migrate';
 const K_CLEAN_DEMO: string = 'clean_demo_v2';
+
+/** replaceUrl 会销毁课程页；仅在同进程、同账号和同课表内复用上一帧。 */
+interface TimetableViewSnapshot {
+  account: string;
+  accountToken: number;
+  tableId: string;
+  week: number;
+  totalWeeks: number;
+  courses: Course[];
+  allCourses: Course[];
+  tables: TableOption[];
+  periods: Period[];
+  settings: AppSettings;
+  showWeekend: boolean;
+  isDay: boolean;
+  signature: string;
+}
+let lastTimetableView: TimetableViewSnapshot | null = null;
 
 /**
  * 首页（课程 Tab）
@@ -47,6 +66,9 @@ const K_CLEAN_DEMO: string = 'clean_demo_v2';
 @Entry
 @Component
 struct Index {
+  @StorageLink('clockEpoch') @Watch('onClockChange') clockEpoch: number = 0;
+  private clockDay: string = '';
+  private clockWeek: number = currentWeek(20);
   @State @Watch('onWeekChange') week: number = currentWeek(20);
   @State previewWeek: number = currentWeek(20);
   private weekSliding: boolean = false;
@@ -56,6 +78,8 @@ struct Index {
   @State courses: Course[] = [];
   /** 该课表全部课程（含其他周），用于渲染「非本周」幽灵块 */
   @State allCourses: Course[] = [];
+  @State gridRevision: number = 0;
+  private courseSignature: string = '';
   @State tables: TableOption[] = [];
   /** 课表重命名 / 新建弹窗 */
   @State showRename: boolean = false;
@@ -74,6 +98,7 @@ struct Index {
   @State detailCourse: Course | null = null;
   /** 作用域：false = 仅本周，true = 所有周 */
   @State detailAllWeeks: boolean = false;
+  private detailWeek: number = 1;
   /** 翻周用 Swiper 控制器：周页左右滑动交给原生跟手动画 */
   private swiperCtrl: SwiperController = new SwiperController();
   /** Swiper 的 20 个页面（周号） */
@@ -123,8 +148,12 @@ struct Index {
 
   @State totalWeeks: number = 20;
   private courseRequest: number = 0;
+  private hasLoadedCourses: boolean = false;
+  private restoringView: boolean = false;
+  private pageRefresh: Promise<void> | null = null;
 
   aboutToAppear(): void {
+    this.restoreView();
     this.weekPages = [];
     for (let i = 1; i <= this.totalWeeks; i++) {
       this.weekPages.push(i);
@@ -133,23 +162,65 @@ struct Index {
     for (let m = 5; m <= 90; m++) {
       this.wheelValues.push(`${m} 分钟`);
     }
+    checkForUpdate(getContext(this) as common.UIAbilityContext, this.getUIContext(), true);
     this.refreshDates();
-    this.loadPeriods();
-    this.loadSettings();
-    this.loadAll();
+    this.refreshPage();
   }
 
   /** 从登录页 / 上课时间设置返回后重新查库与读设置 */
   onPageShow(): void {
     this.cancelImport();
-    this.activeTableId = TimetableStateStore.activeTableId();
-    this.loadPeriods();
-    this.loadSettings();
-    this.reloadTables();
-    this.loadCourses();
+    this.refreshPage();
+  }
+
+  private restoreView(): void {
+    const saved: TimetableViewSnapshot | null = lastTimetableView;
+    if (!saved) { return; }
+    if (saved.accountToken !== AccountScope.token() || saved.account !== Db.accountUser() ||
+      saved.tableId !== TimetableStateStore.activeTableId()) {
+      lastTimetableView = null;
+      return;
+    }
+    this.restoringView = true;
+    this.activeTableId = saved.tableId;
+    this.totalWeeks = saved.totalWeeks;
+    this.week = saved.week;
+    this.previewWeek = saved.week;
+    this.courses = saved.courses;
+    this.allCourses = saved.allCourses;
+    this.tables = saved.tables;
+    this.periods = saved.periods;
+    this.settings = saved.settings;
+    this.showWeekend = saved.showWeekend;
+    this.isDay = saved.isDay;
+    this.courseSignature = saved.signature;
+    this.hasLoadedCourses = true;
+    this.restoringView = false;
+  }
+
+  private captureView(): void {
+    if (!this.hasLoadedCourses) { return; }
+    lastTimetableView = {
+      account: Db.accountUser(), accountToken: AccountScope.token(), tableId: this.activeTableId,
+      week: this.week, totalWeeks: this.totalWeeks, courses: this.courses, allCourses: this.allCourses,
+      tables: this.tables, periods: this.periods, settings: this.settings,
+      showWeekend: this.showWeekend, isDay: this.isDay, signature: this.courseSignature
+    };
+  }
+
+  private refreshPage(): void {
+    if (this.pageRefresh !== null) { return; }
+    this.pageRefresh = this.doRefreshPage().finally(() => { this.pageRefresh = null; });
+  }
+
+  private async doRefreshPage(): Promise<void> {
+    try { await this.loadPeriods(); } catch (e) { hilog.warn(0x0022, 'FuxiaoIdx', 'loadPeriods failed'); }
+    try { await this.loadSettings(); } catch (e) { hilog.warn(0x0022, 'FuxiaoIdx', 'loadSettings failed'); }
+    await this.loadAll();
   }
 
   onPageHide(): void {
+    this.captureView();
     this.cancelWeekSelection();
     this.closeImport();
     this.shareRevision++;
@@ -166,31 +237,7 @@ struct Index {
         // 整页翻转容器：标题、周日期条、课表卡片一起绕 Y 轴翻转
         Column() {
           this.headerBar()
-          WeekBar({
-            dates: this.weekDates,
-            todayIndex: this.todayIndex,
-            showWeekend: this.showWeekend,
-            month: this.weekMonth,
-            dark: this.settings.dark
-          })
-
-          Scroll() {
-            Column({ space: Metric.gap }) {
-              this.courseArea()
-            }
-            .width('100%')
-            .padding({ left: Metric.pagePadding, right: Metric.pagePadding })
-          }
-          .layoutWeight(1)
-          .align(Alignment.TopStart)
-          .scrollBar(BarState.Off)
-          .edgeEffect(EdgeEffect.Spring)
-          .bindSheet($$this.showDetail, this.courseDetailSheet(), {
-            height: 400,
-            dragBar: true,
-            showClose: false,
-            backgroundColor: TC(this.settings.dark).card
-          })
+          this.timetablePane()
         }
         .width('100%')
         .layoutWeight(1)
@@ -727,6 +774,8 @@ struct Index {
 
   private async reloadTables(): Promise<void> {
     try {
+      await Locator.init(getContext(this) as common.UIAbilityContext);
+      await Locator.ensureSeed();
       const list: TimetableInfo[] = await Locator.repo().tables();
       const opts: TableOption[] = [];
       list.forEach((x: TimetableInfo) => {
@@ -743,7 +792,7 @@ struct Index {
         this.activeTableId = opts[0].id;
       }
     } catch (e) {
-      this.toast('读取课表失败');
+      hilog.warn(0x0022, 'FuxiaoIdx', 'reloadTables failed; retain current table list');
     }
   }
 
@@ -868,11 +917,11 @@ struct Index {
     Row() {
       Column() {
         Row() {
-          Text(`第 ${this.week} 周`)
+          Text(`第 ${this.displayedWeek()} 周`)
             .fontSize(Font.title)
             .fontWeight(FontWeight.Bold)
             .fontColor(TC(this.settings.dark).text)
-          if (this.week !== currentWeek(TOTAL_WEEKS)) {
+          if (this.displayedWeek() !== currentWeek(this.totalWeeks)) {
             Text('（非本周）')
               .fontSize(Font.small)
               .fontColor(TC(this.settings.dark).textHint)
@@ -881,7 +930,7 @@ struct Index {
         }
         .alignItems(VerticalAlign.Top)
 
-        Text(weekRangeLabel(this.week))
+        Text(weekRangeLabel(this.displayedWeek()))
           .fontSize(Font.body)
           .fontColor(TC(this.settings.dark).textSub)
           .margin({ top: 2 })
@@ -1187,6 +1236,35 @@ struct Index {
     .onClick(action)
   }
 
+  @Builder
+  timetablePane() {
+          WeekBar({
+            dates: this.weekDates,
+            todayIndex: this.todayIndex,
+            showWeekend: this.showWeekend,
+            month: this.weekMonth,
+            dark: this.settings.dark,
+          })
+
+          Scroll() {
+            Column({ space: Metric.gap }) {
+              this.courseArea()
+            }
+            .width('100%')
+            .padding({ left: Metric.pagePadding, right: Metric.pagePadding })
+          }
+          .layoutWeight(1)
+          .align(Alignment.TopStart)
+          .scrollBar(BarState.Off)
+          .edgeEffect(EdgeEffect.Spring)
+          .bindSheet($$this.showDetail, this.courseDetailSheet(), {
+            height: 400,
+            dragBar: true,
+            showClose: false,
+            backgroundColor: TC(this.settings.dark).card
+          })
+  }
+
   // ---------------- 课表卡片 ----------------
   /** 卡片翻面容容器：正面周课表，背面当天列表 */
   @Builder
@@ -1209,6 +1287,7 @@ struct Index {
     });
     setTimeout(() => {
       this.isDay = !this.isDay;
+      this.refreshDates();
       this.flipY = -90;
       setTimeout(() => {
         animateTo({ duration: half, curve: Curve.EaseOut }, () => {
@@ -1224,7 +1303,7 @@ struct Index {
     Column() {
       DayList({
         courses: this.allCourses,
-        week: this.week,
+        week: this.displayedWeek(),
         periods: this.periods,
         dark: this.settings.dark,
         onCourseTap: (c: Course) => this.openDetail(c)
@@ -1263,7 +1342,9 @@ struct Index {
                 showWeekend: this.showWeekend,
                 showGhost: this.settings.showGhost,
                 periods: this.periods,
-                cellHeight: this.settings.cellHeight,
+                cellHeight: Math.max(this.settings.cellHeight, 68),
+                cellWidth: this.settings.cellWidth,
+                cellWidthRatio: this.settings.cellWidthRatio,
                 dark: this.settings.dark,
                 onCourseTap: (c: Course) => this.openDetail(c)
               })
@@ -1271,7 +1352,7 @@ struct Index {
           }
           .width('100%')
           .height('100%')
-        }, (w: number) => `w${w}`)
+        }, (w: number) => `w${w}-${this.gridRevision}-${this.settings.cellWidth}-${this.settings.cellWidthRatio}`)
       }
       .index(this.week - 1)
       .loop(false)
@@ -1296,7 +1377,7 @@ struct Index {
 
   /** Swiper 必须有确定高度，否则邻周页没渲染时高度会塌陷 */
   private gridHeight(): number {
-    return this.settings.cellHeight * 12 + 16;
+    return Math.max(this.settings.cellHeight, 68) * 12 + 16;
   }
 
   // ---------------- 涓夌偣鑿滃崟鍐呭宸插唴鑱斿埌 build ----------------
@@ -1319,10 +1400,11 @@ struct Index {
           periods: this.periods,
           dark: this.settings.dark,
           allWeeks: this.detailAllWeeks,
+          displayColorIndex: this.detailColorIndex(this.detailCourse as Course),
           onScope: (all: boolean) => {
             this.detailAllWeeks = all;
           },
-          onEdit: () => this.toast('编辑课程（P1）'),
+          onEdit: () => this.editCourse(),
           onCopy: () => this.toast('复制到其他时段（P1）'),
           onDelete: () => this.deleteCourse()
         })
@@ -1376,15 +1458,12 @@ struct Index {
       }
       // 只删「id 与演示数据完全一致」的行，绝不整表清空，
       // 用户的真实课表、手动添加的课程都不受影响。
-      const demoIds: Set<string> = new Set<string>();
-      MOCK_COURSES.forEach((mc: Course) => {
-        demoIds.add(mc.id);
-      });
+      const demoIds: Set<number> = new Set<number>(LEGACY_DEMO_ID_HASHES);
       const tableIds: string[] = ['t1', 't2'];
       let removed: number = 0;
       for (let i = 0; i < tableIds.length; i++) {
         const all: Course[] = await Locator.repo().listAll(tableIds[i]);
-        const keep: Course[] = all.filter((c: Course) => !demoIds.has(c.id));
+        const keep: Course[] = all.filter((c: Course) => !demoIds.has(legacyDemoIdHash(c.id)));
         if (keep.length !== all.length) {
           await Locator.repo().replaceAll(tableIds[i], keep);
           removed += all.length - keep.length;
@@ -1425,7 +1504,13 @@ struct Index {
       const all: Course[] = await Locator.repo().listAll(tableId);
       if (!current()) { return; }
       this.courses = courses;
+      const signature: string = JSON.stringify(all);
+      if (signature !== this.courseSignature) {
+        this.courseSignature = signature;
+        this.gridRevision++;
+      }
       this.allCourses = all;
+      this.hasLoadedCourses = true;
       refreshOwnedReminders(getContext(this) as common.UIAbilityContext, all, this.periods,
         this.settings.remindBefore).catch(() => {});
       refreshOwnedCalendarEvents(getContext(this) as common.UIAbilityContext, all, this.periods).catch(() => {});
@@ -1434,11 +1519,14 @@ struct Index {
         this.activeTableId, this.week, this.courses.length, this.allCourses.length);
     } catch (e) {
       if (!current()) { return; }
-      this.courses = [];
-      this.allCourses = [];
+      if (!this.hasLoadedCourses) {
+        this.courses = [];
+        this.allCourses = [];
+      }
       this.toast('加载课程失败');
     }
     this.refreshNextHint();
+    this.captureView();
   }
 
   /** 下节课提示条：纯本地计算，不依赖系统提醒服务 */
@@ -1454,13 +1542,29 @@ struct Index {
 
   /** 周数变化 → 重新查库 */
   private onWeekChange(): void {
+    if (this.restoringView) { return; }
     this.refreshDates();
     this.loadCourses();
   }
 
   /** 让星期条的日期跟着当前周走 */
+  private onClockChange(): void {
+    const key: string = BeijingClock.dayKey();
+    if (key !== this.clockDay) {
+      const week: number = currentWeek(this.totalWeeks);
+      if (this.week === this.clockWeek) { this.week = week; }
+      this.clockWeek = week;
+      this.clockDay = key;
+      this.refreshDates();
+    }
+  }
+
+  private displayedWeek(): number {
+    return this.isDay ? currentWeek(this.totalWeeks) : this.week;
+  }
+
   private refreshDates(): void {
-    const wd = weekDates(this.week);
+    const wd = weekDates(this.displayedWeek());
     this.weekDates = wd.dates;
     this.weekMonth = wd.month;
     this.todayIndex = wd.todayIndex;
@@ -1551,7 +1655,7 @@ struct Index {
         this.go('pages/AppearancePage');
         break;
       case 'update':
-        checkForUpdate();
+        checkForUpdate(getContext(this) as common.UIAbilityContext, this.getUIContext());
         break;
       default:
         this.toast(`${key}（P1）`);
@@ -1917,8 +2021,27 @@ struct Index {
     this.detailCourse = c;
     // 点的是「非本周」的幽灵块时，本周本来就没有这门课，
     // 作用域默认落到「所有周」，否则「仅本周删除」会删空气
-    this.detailAllWeeks = !isInWeek(c, this.week);
+    this.detailWeek = this.displayedWeek();
+    this.detailAllWeeks = !isInWeek(c, this.detailWeek);
     this.showDetail = true;
+  }
+
+  private detailColorIndex(c: Course): number {
+    let first: number = c.startPeriod;
+    this.allCourses.forEach((item: Course) => {
+      if (item.weekday === c.weekday && item.startPeriod < first) { first = item.startPeriod; }
+    });
+    return displayedColorIndex(c, c.startPeriod === first);
+  }
+
+  private editCourse(): void {
+    const c: Course | null = this.detailCourse;
+    if (!c) { return; }
+    this.showDetail = false;
+    router.pushUrl({ url: 'pages/AddCoursePage',
+      params: { tableId: this.activeTableId, week: this.detailWeek, editId: c.id } }).catch((e: Error) => {
+      this.toast('打开编辑页失败：' + e.message);
+    });
   }
 
   /** 删除课程：按当前作用域决定只摘掉本周还是整条删除 */
@@ -1932,7 +2055,7 @@ struct Index {
         await Locator.repo().remove(c.id);
         this.toast(`已删除「${c.name}」`);
       } else {
-        const left: number[] = c.weeks.filter((w: number) => w !== this.week);
+        const left: number[] = c.weeks.filter((w: number) => w !== this.detailWeek);
         if (left.length === 0) {
           await Locator.repo().remove(c.id);
           this.toast(`已删除「${c.name}」`);
@@ -1940,11 +2063,11 @@ struct Index {
           const kept: Course = {
             id: c.id, name: c.name, teacher: c.teacher, room: c.room, campus: c.campus,
             weekday: c.weekday, startPeriod: c.startPeriod, endPeriod: c.endPeriod,
-            weeks: left, colorIndex: c.colorIndex
+            weeks: left, colorIndex: c.colorIndex, colorOverride: c.colorOverride
           };
           await Locator.repo().remove(c.id);
           await Locator.repo().add(kept, this.activeTableId);
-          this.toast(`已从第 ${this.week} 周移除「${c.name}」`);
+          this.toast(`已从第 ${this.detailWeek} 周移除「${c.name}」`);
         }
       }
       this.showDetail = false;

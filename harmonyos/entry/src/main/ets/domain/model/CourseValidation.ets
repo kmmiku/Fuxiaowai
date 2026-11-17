@@ -14,7 +14,8 @@ export function validateCourses(courses: Course[]): void {
       !Number.isInteger(c.endPeriod) || c.endPeriod < c.startPeriod || c.endPeriod > 48 ||
       !Array.isArray(c.weeks) || c.weeks.length === 0 || c.weeks.length > 60 ||
       !c.weeks.every((w: number) => Number.isInteger(w) && w >= 1 && w <= 60) ||
-      !Number.isInteger(c.colorIndex) || c.colorIndex < 0 || c.colorIndex > 1024) {
+      !Number.isInteger(c.colorIndex) || c.colorIndex < 0 || c.colorIndex > 1024 ||
+      (c.colorOverride !== undefined && typeof c.colorOverride !== 'boolean')) {
       throw new Error('课程数据不完整或超出有效范围');
     }
   });

@@ -14,6 +14,20 @@ export interface Course {
   endPeriod: number;
   weeks: number[];      // [1..20]
   colorIndex: number;
+  /** 用户在编辑器明确选色；优先于工作日首课默认色。 */
+  colorOverride?: boolean;
+}
+
+/** 工作日首课固定色号：红、粉、青、蓝、紫。 */
+export function displayedColorIndex(course: Course, isFirst: boolean): number {
+  if (course.colorOverride === true || course.id.indexOf(':c_') >= 0 || course.id.startsWith('c_')) {
+    return course.colorIndex % 8;
+  }
+  const firstColors: number[] = [0, 0, 1, 2, 3, 4];
+  if (isFirst && course.weekday >= 1 && course.weekday <= 5) {
+    return firstColors[course.weekday];
+  }
+  return course.colorIndex % 8;
 }
 
 export interface Period {

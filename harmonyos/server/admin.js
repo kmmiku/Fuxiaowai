@@ -3,8 +3,8 @@
  const $=id=>document.getElementById(id);
  const state={page:'codes',ticketOffset:0,ticketTotal:0,ticketQuery:'',ticketStatus:'',tickets:[],feedbackOffset:0,feedbackTotal:0,feedback:[],selectedFeedback:null,stats:null,lastSuccess:0};
  const active=new Map(),again=new Set(),failures=new Map();let toastTimer,pollTimer,backoff=5000,cycle=0,pollGeneration=0;
- const labels={stats:'统计',tickets:'口令列表',feedback:'反馈',probes:'系统探针',alerts:'异常告警',audit:'操作记录'};
- const actions={'ticket.inspect':'检测口令','ticket.delete':'删除口令','feedback.read':'标为已读','feedback.delete':'删除反馈','feedback.clear':'清空历史反馈','deploy':'后台升级部署'};
+ const labels={stats:'统计',tickets:'口令列表',feedback:'反馈',probes:'系统探针',alerts:'异常告警',audit:'操作记录',update:'版本发布'};
+ const actions={'ticket.inspect':'检测口令','ticket.delete':'删除口令','feedback.read':'标为已读','feedback.delete':'删除反馈','feedback.clear':'清空历史反馈','update.publish':'发布版本公告','update.withdraw':'撤回版本公告','deploy':'后台升级部署'};
  const statusNames={valid:'有效',expired:'已过期',invalid:'快照异常',missing:'不存在',unchecked:'待检测',healthy:'正常',error:'异常',unknown:'未采集',pending:'等待采样'};
  const fmt=n=>Number.isFinite(Number(n))?Number(n).toLocaleString('zh-CN'):'—';
  const date=n=>n&&Number.isFinite(Number(n))?new Date(Number(n)).toLocaleString('zh-CN',{hour12:false}):'—';
@@ -124,8 +124,11 @@
  async function loadAudit(){return task('audit',async()=>{
   const data=await api('/api/admin/audit');$('audit-rows').replaceChildren();for(const r of data.rows){const tr=el('tr'),outcome=el('td');outcome.append(badge(r.status>=200&&r.status<300?'成功':'失败 · '+r.status,r.status<300?'good':'danger'));tr.append(el('td',date(r.time)),el('td',r.actor),el('td',actions[r.action]||r.action),el('td',r.target?'#'+r.target:'—'),outcome);$('audit-rows').append(tr);}if(!data.rows.length){const row=el('tr'),cell=el('td','暂无操作记录','empty');cell.colSpan=5;row.append(cell);$('audit-rows').append(row);}$('audit-time').textContent='更新于 '+date(data.time);if(data.storageError)throw new Error(data.storageError);
  });}
- function loadPage(){return ({codes:loadTickets,feedback:loadFeedback,probes:loadProbes,alerts:loadAlerts,audit:loadAudit})[state.page]();}
- function navigate(page){if(!['codes','feedback','probes','alerts','audit'].includes(page))page='codes';state.page=page;document.querySelectorAll('[data-page]').forEach(b=>{if(b.dataset.page===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelectorAll('.page').forEach(s=>s.hidden=s.id!=='page-'+page);try{sessionStorage.setItem('fxw-admin-page',page);}catch{}loadPage();}
+ async function loadUpdate(){return task('update',async()=>{const data=await api('/api/admin/app-update');const r=data.release;$('update-name').value=r?.versionName||'';$('update-code').value=r?.versionCode||'';$('update-content').value=r?.content||'';$('update-status').textContent=r?'已发布 · '+date(r.publishedAt):'暂无公告';});}
+ $('update-form').addEventListener('submit',async event=>{event.preventDefault();const b=event.submitter;b.disabled=true;try{await api('/api/admin/app-update',{method:'PUT',body:{versionName:$('update-name').value.trim(),versionCode:Number($('update-code').value),content:$('update-content').value}});toast('版本公告已发布');loadUpdate();}catch(e){toast(e.message);}finally{b.disabled=false;}});
+ $('update-withdraw').addEventListener('click',async()=>{if(!confirm('撤回当前更新公告？'))return;try{await api('/api/admin/app-update',{method:'DELETE'});toast('已撤回');loadUpdate();}catch(e){toast(e.message);}});
+ function loadPage(){return ({codes:loadTickets,feedback:loadFeedback,probes:loadProbes,alerts:loadAlerts,audit:loadAudit,update:loadUpdate,users:()=>Promise.resolve()})[state.page]();}
+ function navigate(page){if(!['codes','feedback','probes','alerts','audit','update','users'].includes(page))page='codes';state.page=page;document.querySelectorAll('[data-page]').forEach(b=>{if(b.dataset.page===page)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});document.querySelectorAll('.page').forEach(s=>s.hidden=s.id!=='page-'+page);try{sessionStorage.setItem('fxw-admin-page',page);}catch{}loadPage();}
  document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
  $('inspect-form').addEventListener('submit',event=>{event.preventDefault();inspectCode($('inspect-code').value);});
  $('inspect-clear').addEventListener('click',()=>{$('inspect-code').value='';$('inspect-panel').hidden=true;$('inspect-code').focus();});
@@ -140,7 +143,7 @@
  async function poll(){
   const generation=++pollGeneration;clearTimeout(pollTimer);if(document.hidden){connection();return;}
   cycle++;await loadStats();if(generation!==pollGeneration||document.hidden)return;
-  if(cycle%3===0){await loadAlerts();if(generation!==pollGeneration||document.hidden)return;await loadPage();}
+  if(cycle%3===0){await loadAlerts();if(generation!==pollGeneration||document.hidden)return;if(state.page!=='update')await loadPage();}
   if(generation!==pollGeneration||document.hidden)return;
   backoff=failures.size?Math.min(60000,Math.max(10000,backoff*2)):5000;pollTimer=setTimeout(poll,backoff);
  }
@@ -148,3 +151,4 @@
  $('http-warning').hidden=location.protocol!=='http:'||['localhost','127.0.0.1'].includes(location.hostname);
  let saved='codes';try{saved=sessionStorage.getItem('fxw-admin-page')||saved;}catch{}navigate(saved);loadAlerts();poll();
 })();
+

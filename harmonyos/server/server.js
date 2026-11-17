@@ -489,6 +489,7 @@ function validCode(c) { return /^[0-9a-f]{32}$/.test(c); }
 
 // ---------- 路由 ----------
 const adminConsole = require('./admin-console').createAdminConsole({ ROOT, TICKET_DIR, TTL_MS, PORT, BIND, json, checkAuth, needAuth });
+const userMetrics = require('./user-metrics').createUserMetrics({ ROOT, json, checkAuth, needAuth, readBody });
 const server = http.createServer(async (req, res) => {
 let releaseWrite = null;
 try {
@@ -497,6 +498,7 @@ try {
   try { url = new URL(req.url, 'http://localhost'); }
   catch { json(req,res,400,{ok:false,msg:'URL 格式错误'});return; }
   const p = url.pathname;
+  if(p==='/admin/user-metrics-ui.js' && req.method==='GET'){if(!checkAuth(req)){needAuth(req,res);return;}send(req,res,200,await fsp.readFile(path.join(__dirname,'user-metrics-ui.js')),'text/javascript; charset=utf-8');return;}
   adminConsole.observe(req, res, url);
   if (await adminConsole.handle(req, res, url)) return;
   try{decodeURIComponent(p);}catch{json(req,res,400,{ok:false,msg:'URL 格式错误'});return;}
@@ -516,11 +518,12 @@ try {
 
   if (rateLimited(ip)) { json(req, res, 429, { ok: false, msg: '请求过于频繁，请稍后再试' }); return; }
 
-  if(req.method==='POST' && ['/api/share','/api/feedback','/api/admin/feedback/read'].includes(p)) {
+  if(req.method==='POST' && ['/api/share','/api/feedback','/api/admin/feedback/read','/api/user-metrics/login'].includes(p)) {
     releaseWrite=admitWrite(req,res);
     if(!releaseWrite)return;
   }
 
+  if (await userMetrics.handle(req,res,url)) return;
   // --- 公开：创建口令 ---
   if (p === '/api/share' && req.method === 'POST') {
     let raw;
@@ -844,3 +847,5 @@ setInterval(()=>cleanup().catch(e=>console.error('cleanup',e.code)),3600000).unr
 
 process.on('SIGTERM', () => { server.close(() => process.exit(0)); });
 process.on('SIGINT', () => { server.close(() => process.exit(0)); });
+
+

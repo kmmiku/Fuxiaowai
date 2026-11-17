@@ -1,5 +1,9 @@
 # 组件 Map
 
+2026-11-15 列宽首帧修复：`TimetableGrid.colW()` 移除 `Math.max(80, ...)`，按屏幕宽减页面边距、卡片内边距和时间轴宽度估算七天/五天单列宽；同进程 `measuredColumnWidths` 只在与当前估值相差 15% 以内时复用，`onAreaChange` 持续记录实际宽度。下方自动生成的旧 `colW` 函数行仍展示修改前快照，以当前源码为准。
+
+2026-11-15 配色补充：`TimetableGrid.isFirstCourse()` 判定该星期最早起始节次；`displayedColorIndex()` 将周一至周五首课映射为 0/1/2/3/4，课程 `colorOverride` 或历史手加课优先。`CourseBlock.displayColorIndex` 控制周卡片底色，`DayList.colorOf()` 与 `CourseDetailSheet.displayColorIndex` 沿用同色。`AddCoursePage` 的八个圆点直接使用八个实色，已选色描边。
+
 更新：2026-11-14。依据当前实际源码静态核对；未启动应用、构建或执行测试。运行时、网络、系统授权与视觉效果待确认。源码行号为当前快照。仅记录字段名及表达式，不记录真实个人信息、密码、cookie、token值。
 
 关联：[总览](README.md) · [项目](PROJECT_MAP.md) · [模块](MODULE_MAP.md) · [页面](PAGE_MAP.md) · [组件](COMPONENT_MAP.md) · [接口](API_MAP.md) · [数据库](DATABASE_MAP.md) · [状态](STATE_MAP.md) · [构建](BUILD_MAP.md)。
@@ -47,6 +51,8 @@
 ## CourseBlock
 
 [entry/src/main/ets/ui/components/CourseBlock.ets](../../entry/src/main/ets/ui/components/CourseBlock.ets)
+
+2026-11-15 核实补充：课程块已改为与安卓端相同的八色实心底、白色 15fp 课名和教室、5vp 圆角；卡片隐藏教师（详情仍保留）。新增 `@Prop alignFirst: boolean = false`，由 TimetableGrid 对每天首门且少于六节的课传入，顶部至少留 16vp；其他课名/教室组居中。窄重叠列或过长教室保留编号。旧的 `rows/onlyName/showTeacher/nameLines/roomLines` 表格为修改前快照，当前以源码为准。安卓的测量式逐字排版尚未移植，窄列最终显示效果待模拟器确认。
 
 | 参数/状态类别 | 声明、类型、默认值原文 |
 |---|---|
@@ -573,3 +579,32 @@ TableSwitcher 选中态用 LineIcon(name=check,iconSize=27,tone=white,strokeW=2.
 ## 2026-11-14｜我的页面检查更新
 
 ProfilePage.rowItem 的 update 项复用 MenuSheet 同名 download LineIcon，tone=text（其余行色调不变），沿用列表圆底与按压反馈。
+
+## 2026-11-15｜更新公告
+[UpdateAnnouncement](../../entry/src/main/ets/ui/components/UpdateAnnouncement.ets) 为@Component，参数version/content/canIgnore/preview/onDismiss/onUpdate；updateDialogBuilder包装UpdateDialogParams，UpdateCheck通过ComponentContent及UIContext.getPromptAction().openCustomDialog展示。内容区可滚动，按钮暂不更新/立即更新，标准Checkbox。ProfilePage长按检查更新打开明确标注的本地样式预览；预览不保存偏好、不发起安装。
+
+## 2026-11-15｜图标与首次加载
+ProfilePage更新图标与网络检测统一tone=sub，亮色#8A90A0，深色#A9AEBD。
+
+2026-11-16：BottomTabs第三项工作台→pages/WorkbenchPage，LineIcon新增toolbox。WorkbenchPage本地WorkbenchFavorites通过@Link favorites绑定数组，避免bindSheet捕获初始空列表；双列服务卡与通栏卡、500ms长按菜单（244vp）、菜单按来源卡片上下避让。
+
+
+2026-11-16 格子宽度：TimetableGrid 新增 blockWidthScale（默认1）和 onBaseBlockWidth 回调；实际课程块宽度乘缩放比例，测量列宽后回报未缩放基础宽度。Index传入设置并将比例纳入Swiper子项key。
+
+2026-11-16 宽度重叠修正：上条0.875～1.25范围已替换为0.875～1；SettingsStore.load夹回旧超限值，TimetableGrid.blockW按子列unit-1设上限（移除14vp最小宽导致的多列越界）。设置页P1布局为格子高度/格子宽度、下方灰色vp、蓝色滑块，无底部范围文字；宽度0.1vp步进。原背景/面板opacity未改。
+
+2026-11-16 安卓列宽方案替换此前卡片缩放方案：TimetableGrid/WeekBar新增cellWidth，0自动、45～55vp手动。日期和课程共用同一列宽；Grid卡片在子列内留2vp间隔，不使用14/18vp最小宽。旧blockWidthScale属性已移除。
+
+2026-11-16 时间轴样式对齐安卓solution最新423段：TimetableGrid左侧三行（节次/开始/结束）均12fp字号、12vp行高及高度，间距1vp、居中；节次Normal/textHint，时间textHint且opacity0.75。读取periods，不改默认时间、个人设置、列宽或卡片。
+
+2026-11-16 安卓最新自适应/课程文字/日视图迁移（替换此前宽度方案）：TimetableGrid.cellWidth仅兼容旧绝对值，cellWidthRatio为0自动/0.8～1；日列始终layoutWeight等分，onBaseBlockWidth返回实测列宽。CellWidth.effectiveWidth按实测列计算0.1vp上下界。课程块居中且不越出撞课子列。CourseBlock用@ohos.measure逐字测量并BREAK_ALL换行，CourseTextLayout计算行数/教室至少两行留位，长地点按需退回编号；字号/颜色未改。WeekBar取消手动固定宽度。
+
+2026-11-16 安卓最终方案同步：替换此前45～55vp横滚方案：TimetableGrid列宽始终等分容器，onBaseBlockWidth返回实测值，cellWidthRatio控制卡片在所属日列/撞课子列中居中缩放。CellWidth范围实际列宽80%～100%。CourseTextLayout辅助逐字换行、至少两行教室留位及fixedRoomCode；CourseBlock测字配合BREAK_ALL，教5404固定为教5\n404，完整信息仍在详情。
+
+2026-11-16 日视图时间配色逻辑：DayList.colorOf不再按课程色号，改用DayCourseStatus.hasCourseEnded与实际末节结束时间，已结束引用COURSE_COLORS[3]蓝，未结束引用[0]红；原浅底/实色色值及周视图配色不变。组件出现启动1秒刷新，消失清理计时器。
+
+2026-11-16 联网北京时间：DayList的clockTime来自BeijingClock，civil(clockTime)取UTC字段；hasCourseEnded接收北京时间civil，getUTC*禁止系统时区介入。
+
+2026-11-16 工作台常用功能退役：WorkbenchPage删除LongPressGesture、菜单遮罩、添加/移除/查看常用、WorkbenchFavorites弹层及preferences读写/状态。五项服务及官网点击入口不变。PrivacyDocPage删除常用收集条目，ServiceLocator仍清理旧fxw_workbench数据以兼容历史版本；不自动清除用户其他数据。
+
+2026-11-17 成绩/考试按安卓当前开发日志复刻：LineIcon新增search、query-back/query-refresh/query-down，query-blue色#168BD1；成绩分数亮色#1675C8暗色#6CAAFF。GradeRow分隔线/白底，ExamCard布局左弹性、中60vp、右126vp、日历线图标，最小108vp高、12vp圆角。

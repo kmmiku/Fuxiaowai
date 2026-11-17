@@ -112,7 +112,8 @@ export function toLocalCourses(list: Course[]): Course[] {
       startPeriod: c.startPeriod,
       endPeriod: c.endPeriod,
       weeks: c.weeks,
-      colorIndex: c.colorIndex
+      colorIndex: c.colorIndex,
+      colorOverride: c.colorOverride
     };
     out.push(item);
   }
@@ -210,7 +211,8 @@ export function validateSnapshot(snap: ShareSnapshot): boolean {
     if (course.teacher === undefined) { course.teacher = ''; }
     if (course.campus === undefined) { course.campus = ''; }
     if (course.colorIndex === undefined) { course.colorIndex = colorIndexOf(course.name); }
-    if (!text(course.teacher, 300) || !text(course.campus, 300) || !integer(course.colorIndex, 0, 255)) { return false; }
+    if (!text(course.teacher, 300) || !text(course.campus, 300) || !integer(course.colorIndex, 0, 255) ||
+      (course.colorOverride !== undefined && typeof course.colorOverride !== 'boolean')) { return false; }
     courseIds.add(course.id);
   }
   const indices: Set<number> = new Set<number>();

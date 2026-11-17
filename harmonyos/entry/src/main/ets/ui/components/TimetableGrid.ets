@@ -1,7 +1,11 @@
 import { Font, Metric, Palette, TC } from '../../common/design/Tokens';
-import { Course, DEFAULT_PERIODS, Period, isInWeek } from '../../domain/model/Course';
+import { Course, DEFAULT_PERIODS, Period, isInWeek, displayedColorIndex } from '../../domain/model/Course';
 import { CourseBlock } from './CourseBlock';
 import display from '@ohos.display';
+import { effectiveWidth } from '../../common/util/CellWidth';
+
+/** Tab 页面被 replaceUrl 重建时沿用同进程、同布局的上次列宽。 */
+const measuredColumnWidths: number[] = [0, 0];
 
 interface DayCell {
   start: number;
@@ -30,7 +34,9 @@ export struct TimetableGrid {
   @Prop periods: Period[] = DEFAULT_PERIODS;
   @Prop cellHeight: number = 52;
   @Prop dark: boolean = false;
-  /** 课程块占列宽的比例（0.65~1），来自课表设置的无极滑块 */
+  @Prop cellWidth: number = 0;
+  @Prop cellWidthRatio: number = 0;
+  onBaseBlockWidth: (width: number) => void = () => {};
   /** 点课程块回调：打开课程详情弹窗 */
   onCourseTap: (c: Course) => void = () => {};
   /** 每天那一列的实际宽度（vp），由 onAreaChange 量出来，用于重叠块横向分列 */
@@ -42,34 +48,37 @@ export struct TimetableGrid {
       return this.colWidth;
     }
     const sw: number = px2vp(display.getDefaultDisplaySync().width);
-    return Math.max(80, (sw - Metric.timeColWidth - 32) / this.days().length);
+    const estimated: number = Math.max(14,
+      (sw - Metric.pagePadding * 2 - 12 - Metric.timeColWidth) / this.days().length);
+    const cached: number = measuredColumnWidths[this.showWeekend ? 1 : 0];
+    return cached > 0 && Math.abs(cached - estimated) < estimated * 0.15 ? cached : estimated;
   }
 
-  /**
-   * 课程块宽度。
-   * blockRatio / 0.7 是等比标尺：0.7 = 正好一列（默认宽度），1 = 约 1.43 列。
-   * 上限取「本列起点到表格右边界」，因此周日以外的每一列都能继续加宽，
-   * 只有最后一列受表格边界限制。加宽部分会盖住右边相邻的格子——这是刻意的。
-   */
-  /** 等比系数：0.7 = 1.0 倍（默认宽度），1.0 = 约 1.43 倍。每个块都乘同一个系数 */
-
-  /** 块宽 = 本格基准宽 × 等比系数。不做表格边界截断，超出部分由 blockX 左移收回 */
+  /** 在现有课程块宽度上等比调整，不改变时间轴和星期列。 */
   private blockW(cell: DayCell): number {
     const unit: number = this.colW() / cell.cols;
-    return Math.max(unit, 14) - 1;
+    const desired: number = effectiveWidth(this.colW(), this.cellWidthRatio, this.cellWidth);
+    return Math.max(0, Math.min(unit, desired / cell.cols) - 2);
   }
 
-  /**
-   * 横向起点。最右列加宽后会顶出表格右边界，把起点左移同样多的量，
-   * 这样每一块都能变宽、又不会跑出屏幕。
-   */
+  /** 保持课程在星期列中的起点。 */
   private blockX(cell: DayCell): number {
     const unit: number = this.colW() / cell.cols;
-    return 1 + unit * cell.col;
+    return 1 + unit * cell.col + Math.max(0, unit - this.blockW(cell) - 2) / 2;
   }
 
   private days(): number[] {
     return this.showWeekend ? [1, 2, 3, 4, 5, 6, 7] : [1, 2, 3, 4, 5];
+  }
+
+  private isFirstCourse(course: Course): boolean {
+    let first: number = course.startPeriod;
+    this.courses.forEach((item: Course) => {
+      if (item.weekday === course.weekday && item.startPeriod < first) {
+        first = item.startPeriod;
+      }
+    });
+    return course.startPeriod === first;
   }
 
   /** 节次 → 起止时间（块内展示用） */
@@ -201,18 +210,25 @@ export struct TimetableGrid {
       // ---------- 左侧时间轴 ----------
       Column() {
         ForEach(this.periods, (p: Period) => {
-          Column() {
+          Column({ space: 1 }) {
             Text(`${p.index}`)
-              .fontSize(Font.body)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(TC(this.dark).textSub)
+              .fontSize(12)
+              .lineHeight(12)
+              .height(12)
+              .fontWeight(FontWeight.Normal)
+              .fontColor(TC(this.dark).textHint)
             Text(p.start)
-              .fontSize(Font.tiny)
+              .fontSize(12)
+              .lineHeight(12)
+              .height(12)
               .fontColor(TC(this.dark).textHint)
-              .margin({ top: 2 })
+              .opacity(0.75)
             Text(p.end)
-              .fontSize(Font.tiny)
+              .fontSize(12)
+              .lineHeight(12)
+              .height(12)
               .fontColor(TC(this.dark).textHint)
+              .opacity(0.75)
           }
           .width('100%')
           .height(this.cellHeight)
@@ -250,6 +266,8 @@ export struct TimetableGrid {
                     endTime: this.timeOf(c.endPeriod, false),
                     ghost: cell.ghost,
                     dark: this.dark,
+                    alignFirst: this.isFirstCourse(c) && c.endPeriod - c.startPeriod + 1 < 6,
+                    displayColorIndex: displayedColorIndex(c, this.isFirstCourse(c)),
                     cols: cell.cols,
                     blockHeight: ((cell.end - cell.start + 1) * this.cellHeight - 4) / cell.courses.length - 3
                   })
@@ -266,6 +284,8 @@ export struct TimetableGrid {
                   endTime: this.timeOf(cell.end, false),
                   ghost: cell.ghost,
                   dark: this.dark,
+                  alignFirst: this.isFirstCourse(cell.courses[0]) && cell.end - cell.start + 1 < 6,
+                  displayColorIndex: displayedColorIndex(cell.courses[0], this.isFirstCourse(cell.courses[0])),
                   cols: cell.cols,
                   blockHeight: (cell.end - cell.start + 1) * this.cellHeight - 4
                 })
@@ -283,6 +303,8 @@ export struct TimetableGrid {
           const w: number = Number(n.width);
           if (w > 0 && Math.abs(w - this.colWidth) > 0.5) {
             this.colWidth = w;
+            this.onBaseBlockWidth(w);
+            measuredColumnWidths[this.showWeekend ? 1 : 0] = w;
           }
         })
       }, (d: number) => `day${d}`)

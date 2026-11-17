@@ -1,147 +1,132 @@
-import { COURSE_COLORS, Font, Metric, Palette, TC } from '../../common/design/Tokens';
+import { COURSE_COLORS, Metric } from '../../common/design/Tokens';
 import { Course } from '../../domain/model/Course';
+import measure from '@ohos.measure';
+import { wrappedLineCount, courseNameLines, fixedRoomCode } from '../../common/util/CourseTextLayout';
 
-/**
- * 课程块：浅底 + 同色深字 + 左侧 3vp 色条
- * 高度由外部（Grid 行跨度）决定；课名 / 教室 / 教师一律完整换行显示，不作省略号；
- * 不显示上课时间（左侧时间轴已经有了），把空间留给课名。
- */
+const glyphWidths: Map<string, number> = new Map<string, number>();
+
+/** 与安卓课表一致的实心白字课程块。教师保留在课程详情中。 */
 @Component
 export struct CourseBlock {
   @Prop course: Course;
   @Prop compact: boolean = false;
-  /** 7 天模式：列更窄，字号收一档 */
   @Prop narrow: boolean = false;
-  /** 一节课的高度，用来推算这个块能放几行字 */
   @Prop cellHeight: number = 52;
   @Prop startTime: string = '';
   @Prop endTime: string = '';
-  /** 幽灵块：这门课本周不上（只做占位提示） */
   @Prop ghost: boolean = false;
   @Prop dark: boolean = false;
-  /** 外部指定的块高（同格多课平分时用）；0 表示按节次跨度自己算 */
   @Prop blockHeight: number = 0;
-  /** 这个块所在的重叠簇一共分了几列（1 表示独占） */
   @Prop cols: number = 1;
+  @Prop alignFirst: boolean = false;
+  @Prop displayColorIndex: number = -1;
 
-  private span(): number {
-    return this.course.endPeriod - this.course.startPeriod + 1;
+  @State measuredWidth: number = 38;
+
+  private heightVp(): number {
+    return this.blockHeight > 0 ? this.blockHeight :
+      (this.course.endPeriod - this.course.startPeriod + 1) * this.cellHeight - 4;
   }
 
-  /** 这个块实际有多高（vp） */
-  private h(): number {
-    return this.blockHeight > 0 ? this.blockHeight : this.span() * this.cellHeight - 4;
-  }
-
-  /** 按高度能放几行字（课名行高 15、其它行 11，取中间值 13 估算） */
-  private rows(): number {
-    return Math.max(1, Math.floor((this.h() - 6) / 13));
-  }
-
-  /** 窄列（7 天模式）又被拆成多列时，一列只剩 40~50vp，只能保住课名 */
-  private onlyName(): boolean {
-    return this.narrow && this.cols > 1;
-  }
-
-  /** 教室：只要有就不省略地显示（不再按行数裁剪） */
-  private showRoom(): boolean {
-    return !this.ghost && !this.onlyName() && this.course.room.length > 0;
-  }
-
-  /** 教师：只要有就不省略地显示 */
-  private showTeacher(): boolean {
-    return !this.ghost && !this.onlyName() && this.course.teacher.length > 0;
-  }
-
-  /** 课名至少留一行，其余让给教室和教师 */
-  private nameLines(): number {
-    const rest: number = this.rows() - (this.showRoom() ? 1 : 0) - (this.showTeacher() ? 1 : 0);
-    if (this.compact) {
-      return Math.max(1, rest);
+  private roomCode(): string {
+    const room: string = this.course.room.trim();
+    const matched: RegExpMatchArray | null = room.match(/(?:教|实|[A-Za-z])?\s*\d+(?:[-－—]\d+)*/g);
+    if (!matched || matched.length === 0) {
+      return room;
     }
-    if (this.ghost) {
-      return this.rows() >= 3 ? 2 : 1;
+    for (let i: number = 0; i < matched.length; i++) {
+      if (matched[i].indexOf('教') >= 0 || matched[i].indexOf('实') >= 0) {
+        return matched[i].trim();
+      }
     }
-    if (this.narrow) {
-      return this.onlyName() ? Math.max(1, this.rows()) : Math.max(2, rest);
-    }
-    return Math.max(2, rest);
+    return matched[matched.length - 1].trim();
   }
 
-  /** 教室行数：窄列长教室名要折行 */
+  private linesOf(text: string): number {
+    const widths: number[] = [];
+    for (let i: number = 0; i < text.length; i++) {
+      const glyph: string = text.charAt(i);
+      if (glyph === '\n') { widths.push(-1); continue; }
+      let width: number | undefined = glyphWidths.get(glyph);
+      if (width === undefined) {
+        width = px2vp(measure.measureText({ textContent: glyph, fontSize: '15fp', fontWeight: '700' }));
+        glyphWidths.set(glyph, width);
+      }
+      widths.push(width);
+    }
+    return wrappedLineCount(widths, Math.max(1, this.measuredWidth - 6));
+  }
+
+  private roomText(): string {
+    const room: string = this.course.room.trim();
+    const fixed: string = fixedRoomCode(this.roomCode());
+    if (fixed.indexOf('\n') >= 0) { return fixed; }
+    return this.cols > 1 || this.linesOf(room) > 2 ? this.roomCode() : room;
+  }
+
   private roomLines(): number {
-    return this.narrow ? 2 : 2;
+    return this.ghost || !this.course.room.trim() ? 0 : this.linesOf(this.roomText());
+  }
+
+  private maxNameLines(): number {
+    return courseNameLines(this.heightVp(), this.roomLines());
+  }
+
+  private maxRoomLines(): number {
+    const name: number = Math.min(this.linesOf(this.course.name), this.maxNameLines());
+    return Math.max(1, Math.floor((this.heightVp() - 16 - name * 16) / 16));
+  }
+
+  private topAligned(): boolean {
+    return this.alignFirst || (this.linesOf(this.course.name) + this.roomLines()) * 16 > this.heightVp() - 32;
   }
 
   build() {
-    Row() {
-      // 左侧色条
-      Column()
-        .width(3)
-        .height('100%')
-        .backgroundColor(this.ghost
-          ? ('#6E' + COURSE_COLORS[this.course.colorIndex % 8][1].substring(1))
-          : COURSE_COLORS[this.course.colorIndex % 8][1])
-        .borderRadius({ topLeft: Metric.blockRadius, bottomLeft: Metric.blockRadius })
+    Column() {
+      Text(this.course.name)
+        .fontSize(15)
+        .fontWeight(FontWeight.Bold)
+        .fontColor('#FFFFFF')
+        .lineHeight(16)
+        .wordBreak(WordBreak.BREAK_ALL)
+        .maxLines(this.maxNameLines())
+        .textOverflow({ overflow: TextOverflow.Clip })
+        .textAlign(TextAlign.Center)
+        .width('100%')
 
-      Column() {
-        // 课名：加粗 + 换行，溢出裁切而不是省略号
-        Text(this.course.name)
-          .fontSize(this.compact ? 9 : (this.narrow ? 8 : 12))
-          .fontWeight(FontWeight.Bold)
-          .fontColor(COURSE_COLORS[this.course.colorIndex % 8][1])
-          .lineHeight(this.compact ? 11 : (this.narrow ? 10 : 15))
-          .maxLines(this.nameLines())
+      if (!this.ghost && this.course.room.trim().length > 0) {
+        Text(this.roomText())
+          .fontSize(15)
+          .fontWeight(600)
+          .fontColor('#FFFFFF')
+          .lineHeight(16)
+          .wordBreak(WordBreak.BREAK_ALL)
+          .maxLines(this.maxRoomLines())
           .textOverflow({ overflow: TextOverflow.Clip })
+          .textAlign(TextAlign.Center)
           .width('100%')
-
-        if (this.showRoom()) {
-          Text(this.course.room)
-            .fontSize(this.narrow ? 8 : Font.tiny)
-            .fontColor(COURSE_COLORS[this.course.colorIndex % 8][1])
-            .opacity(0.9)
-            .lineHeight(this.narrow ? 10 : 11)
-            .maxLines(this.roomLines())
-            .textOverflow({ overflow: TextOverflow.Clip })
-            .width('100%')
-        }
-
-        if (this.showTeacher()) {
-          Text(this.course.teacher)
-            .fontSize(this.narrow ? 8 : Font.tiny)
-            .fontColor(Palette.textSub)
-            .lineHeight(this.narrow ? 10 : 11)
-            .maxLines(2)
-            .textOverflow({ overflow: TextOverflow.Clip })
-            .width('100%')
-        }
-
-        // 非本周：块底压一个浅色小标签
-        if (this.ghost) {
-          Blank()
-          Text('非本周')
-            .fontSize(this.narrow ? 7 : Font.tiny)
-            .fontColor(TC(this.dark).textHint)
-            .lineHeight(this.narrow ? 9 : 11)
-            .maxLines(1)
-            .width('100%')
-        }
       }
-      .layoutWeight(1)
-      .height('100%')
-      .justifyContent(FlexAlign.Start)
-      .alignItems(HorizontalAlign.Start)
-      .opacity(this.ghost ? 0.78 : 1)
-      .padding(this.narrow
-        ? { left: 3, right: 2, top: 2, bottom: 1 }
-        : { left: this.compact ? 3 : 5, right: this.compact ? 2 : 4, top: 4, bottom: 3 })
+
+      if (this.ghost) {
+        Text('非本周')
+          .fontSize(9)
+          .fontColor('#FFFFFF')
+          .maxLines(1)
+          .textAlign(TextAlign.Center)
+          .width('100%')
+      }
     }
     .width('100%')
+    .onAreaChange((_old: Area, area: Area) => {
+      const width: number = Number(area.width);
+      if (width > 0 && Math.abs(width - this.measuredWidth) > 0.1) { this.measuredWidth = width; }
+    })
     .height('100%')
-    .alignItems(VerticalAlign.Top)
-    .backgroundColor(this.ghost
-      ? ('#2E' + COURSE_COLORS[this.course.colorIndex % 8][0].substring(1))
-      : COURSE_COLORS[this.course.colorIndex % 8][0])
+    .alignItems(HorizontalAlign.Center)
+    .justifyContent(this.topAligned() ? FlexAlign.Start : FlexAlign.Center)
+    .padding({ left: 3, right: 3, top: 16, bottom: this.topAligned() ? 0 : 16 })
+    .backgroundColor(COURSE_COLORS[((this.displayColorIndex >= 0 ? this.displayColorIndex : this.course.colorIndex) % 8 + 8) % 8][1])
+    .opacity(this.ghost ? 0.4 : 1)
     .borderRadius(Metric.blockRadius)
     .clip(true)
     .margin(1)

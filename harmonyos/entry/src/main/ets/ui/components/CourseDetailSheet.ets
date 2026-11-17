@@ -12,6 +12,7 @@ export struct CourseDetailSheet {
   @Prop periods: Period[] = [];
   @Prop dark: boolean = false;
   @Prop allWeeks: boolean = false;
+  @Prop displayColorIndex: number = -1;
   /** sheet 内容不订阅父状态，作用域标记要在本地自己维护 */
   @State scopeAll: boolean = false;
   onScope: (all: boolean) => void = () => {};
@@ -24,7 +25,7 @@ export struct CourseDetailSheet {
   }
 
   private accent(): string {
-    return COURSE_COLORS[this.course.colorIndex % 8][1];
+    return COURSE_COLORS[this.displayColorIndex >= 0 ? this.displayColorIndex : this.course.colorIndex % 8][1];
   }
 
   /** 起止时间：08:25-09:10 */

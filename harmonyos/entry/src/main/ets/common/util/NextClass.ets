@@ -65,7 +65,7 @@ export function nextClassOf(courses: Course[], periods: Period[], week: number, 
   return best;
 }
 
-/** 提示条文案：今天 18:30 还有 25 分钟 · 虚拟化技术 · 教4203 */
+/** 提示条文案：今天 18:30 还有 25 分钟 · 示例课程 · 示例教室 */
 export function nextClassLabel(n: NextClass | null): string {
   if (!n) {
     return '本周已经没有课了';

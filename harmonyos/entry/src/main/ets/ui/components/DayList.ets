@@ -1,5 +1,7 @@
+import { BeijingClock } from '../../common/util/BeijingClock';
 import { COURSE_COLORS, Font, Metric, Palette, TC } from '../../common/design/Tokens';
 import { Course, Period, isInWeek } from '../../domain/model/Course';
+import { hasCourseEnded } from '../../common/util/DayCourseStatus';
 
 /** 当天的一节课（含同节次重叠的多门课，按开始节次排序） */
 interface DayItem {
@@ -22,12 +24,24 @@ export struct DayList {
   @Prop dayOfWeek: number = 0;
   onCourseTap: (c: Course) => void = () => {};
 
+  @State clockTime: number = BeijingClock.now();
+  private clockTimer: number = -1;
+
+  aboutToAppear(): void {
+    this.clockTime = BeijingClock.now();
+    this.clockTimer = setInterval(() => { this.clockTime = BeijingClock.now(); }, 1000);
+  }
+
+  aboutToDisappear(): void {
+    if (this.clockTimer !== -1) { clearInterval(this.clockTimer); this.clockTimer = -1; }
+  }
+
   /** 1=周一 … 7=周日 */
   private today(): number {
     if (this.dayOfWeek > 0) {
       return this.dayOfWeek;
     }
-    const d: number = new Date().getDay();
+    const d: number = BeijingClock.civil(this.clockTime).getUTCDay();
     return d === 0 ? 7 : d;
   }
 
@@ -60,10 +74,14 @@ export struct DayList {
     return list.sort((a: DayItem, b: DayItem) => a.course.startPeriod - b.course.startPeriod);
   }
 
+  private colorOf(course: Course): number {
+    return hasCourseEnded(this.timeOf(course.endPeriod, false), BeijingClock.civil(this.clockTime)) ? 3 : 0;
+  }
+
   private dateLabel(): string {
-    const now: Date = new Date();
-    const names: string[] = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    return `${now.getMonth() + 1}月${now.getDate()}日 ${names[this.today() - 1]}`;
+    const now: Date = BeijingClock.civil(this.clockTime);
+    const names: string[] = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    return `${now.getUTCMonth() + 1}月${now.getUTCDate()}日 ${names[this.today() - 1]}`;
   }
 
   build() {
@@ -120,7 +138,7 @@ export struct DayList {
               Column()
                 .width(4)
                 .height('100%')
-                .backgroundColor(COURSE_COLORS[it.course.colorIndex % 8][1])
+                .backgroundColor(COURSE_COLORS[this.colorOf(it.course)][1])
                 .borderRadius({ topLeft: 10, bottomLeft: 10 })
 
               Column() {
@@ -128,7 +146,7 @@ export struct DayList {
                   Text(it.course.name)
                     .fontSize(14)
                     .fontWeight(FontWeight.Medium)
-                    .fontColor(COURSE_COLORS[it.course.colorIndex % 8][1])
+                    .fontColor(COURSE_COLORS[this.colorOf(it.course)][1])
                     .layoutWeight(1)
                     .maxLines(2)
                     .textOverflow({ overflow: TextOverflow.Ellipsis })
@@ -136,7 +154,7 @@ export struct DayList {
                     ? `第${it.course.startPeriod}节`
                     : `第${it.course.startPeriod}-${it.course.endPeriod}节`)
                     .fontSize(Font.tiny)
-                    .fontColor(COURSE_COLORS[it.course.colorIndex % 8][1])
+                    .fontColor(COURSE_COLORS[this.colorOf(it.course)][1])
                     .opacity(0.8)
                     .margin({ left: 6 })
                 }
@@ -167,7 +185,7 @@ export struct DayList {
             .layoutWeight(1)
               .height(86)
               .alignItems(VerticalAlign.Center)
-              .backgroundColor(COURSE_COLORS[it.course.colorIndex % 8][0])
+              .backgroundColor(COURSE_COLORS[this.colorOf(it.course)][0])
             .borderRadius(10)
             .onClick(() => this.onCourseTap(it.course))
 

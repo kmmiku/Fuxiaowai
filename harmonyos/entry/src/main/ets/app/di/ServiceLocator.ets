@@ -1,3 +1,4 @@
+import { reportLoginMetric } from '../../data/remote/UserMetrics';
 import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 import { CourseRepository, TimetableInfo } from '../../domain/repository/CourseRepository';
@@ -257,6 +258,10 @@ export class Locator {
     await FeedbackStore.clear(ctx);
     const shares: preferences.Preferences = await preferences.getPreferences(ctx, 'fxw_share');
     await shares.clear(); await shares.flush();
+    const favorites: preferences.Preferences = await preferences.getPreferences(ctx, 'fxw_workbench');
+    await favorites.clear(); await favorites.flush();
+    const examCache: preferences.Preferences = await preferences.getPreferences(ctx, 'fxw_exam_cache');
+    await examCache.clear(); await examCache.flush();
     try { webview.WebCookieManager.clearAllCookiesSync(); } catch (e) {}
     await clearOwnedReminders(ctx);
     // Calendar read/write may be denied; do not silently claim all data was removed.
@@ -305,6 +310,7 @@ export class Locator {
     if (r.ok && AccountScope.valid(token)) {
       const sid: string = r.student.studentId.length > 0 ? r.student.studentId : user;
       Locator.gradesInBackground(sid);
+      reportLoginMetric(sid).catch(() => {});
     }
     return r;
   }
@@ -331,3 +337,4 @@ export class Locator {
     }
   }
 }
+

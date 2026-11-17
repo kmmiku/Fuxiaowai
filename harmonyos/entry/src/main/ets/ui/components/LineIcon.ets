@@ -22,6 +22,7 @@ export struct LineIcon {
   private canvasReady: boolean = false;
 
   private color(): string {
+    if (this.tone === 'query-blue') { return '#168BD1'; }
     if (this.tone === 'white') { return '#FFFFFF'; }
     if (this.tone === 'text') {
       return this.dark ? '#E8EAF0' : '#161821';
@@ -87,7 +88,18 @@ export struct LineIcon {
     c.lineJoin = 'round';
     c.beginPath();
 
-    if (this.name === 'check') {
+    if (this.name === 'query-down') {
+      c.moveTo(4, 8); c.lineTo(12, 16); c.lineTo(20, 8);
+    } else if (this.name === 'search') {
+      this.arcPath(c, 10, 10, 7, 0, PI * 2); c.moveTo(15, 15); c.lineTo(21, 21);
+    } else if (this.name === 'query-back') {
+      c.moveTo(15, 3); c.lineTo(6, 12); c.lineTo(15, 21);
+    } else if (this.name === 'query-refresh') {
+      this.arcPath(c, 12, 12, 8, -PI * 0.25, PI * 1.5); c.moveTo(20, 3); c.lineTo(20, 9); c.lineTo(14, 9);
+    } else if (this.name === 'toolbox') {
+      this.rrect(c, 3, 7, 18, 13, 2); this.rrect(c, 8, 3, 8, 4, 1);
+      c.moveTo(3, 12); c.lineTo(21, 12); c.moveTo(10, 11); c.lineTo(10, 14); c.lineTo(14, 14); c.lineTo(14, 11);
+    } else if (this.name === 'check') {
       c.lineCap = 'butt';
       c.lineJoin = 'miter';
       c.moveTo(5, 12); c.lineTo(10, 17); c.lineTo(20, 6);

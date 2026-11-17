@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>福小外 · 课表助手</title>
-<meta name="description" content="福小外是一款面向高校学生的课表管理工具，提供鸿蒙与安卓双端，支持课表查看、手动添加课程、口令分享与导入、校历、成绩、上课提醒与桌面小组件。">
+<meta name="description" content="福小外是一款面向高校学生的课表管理工具，支持课表查看、手动添加课程、口令分享与导入、校历、成绩、上课提醒与桌面小组件。">
 <link rel="stylesheet" href="/style.css">
 <link rel="icon" type="image/png" href="/img/favicon.png">
 <link rel="apple-touch-icon" href="/img/icon.png">
@@ -21,7 +21,7 @@
       </div>
     </div>
     <div class="meta">
-      <span class="chip">版本 0.1.1</span>
+      <span class="chip">版本 0.1.0</span>
       <span class="chip">HarmonyOS</span>
       <span class="chip">Android</span>
       <span class="chip">简体中文</span>
@@ -35,7 +35,7 @@
   <h2>这是什么</h2>
   <p class="lead">
     福小外把一学期的课表收进手机：周视图一屏看全一周，日视图只看今天；课程可以手动录入，也可以用一个口令和同学互换课表。
-    你可以把课表导出到系统日历、设置上课提醒，或者在桌面放一张「今天的课」卡片。所有信息都保存在本机，卸载即清空。
+    你可以把课表导出到系统日历、设置上课提醒，或者在桌面放一张「今天的课」卡片。课表与成绩主要保存在本机，分享、反馈和登录统计按隐私政策处理。
   </p>
 
   <h2>主要功能</h2>
@@ -49,18 +49,6 @@
     <div class="card"><h3>上课提醒</h3><p>按本周课表生成提醒，可提前 5/10/15/30 分钟；也可导出到系统日历。</p></div>
     <div class="card"><h3>桌面小组件</h3><p>「今天的课」卡片放在桌面，不用打开应用也能看到下一节课。</p></div>
   </div>
-
-  <h2>平台支持</h2>
-  <p class="lead">
-    福小外现在是双端：鸿蒙原生版与安卓版共用同一个包名、同一套口令分享协议和同一套后端接口，两端之间可以互相导入课表。
-  </p>
-  <table>
-    <thead><tr><th>平台</th><th>版本</th><th>最低系统</th><th>获取方式</th></tr></thead>
-    <tbody>
-      <tr><td>HarmonyOS</td><td>0.1.1（第一版）</td><td>HarmonyOS 5.0.0（API 12）</td><td>华为应用市场搜索「福小外」；安装包同时放在 GitHub Releases</td></tr>
-      <tr><td>Android</td><td>0.1.1（versionCode 3）</td><td>Android 5.1（API 22）</td><td>GitHub Releases 下载 APK（当前为 Debug 验收包，尚未上架应用商店）</td></tr>
-    </tbody>
-  </table>
 
   <h2>界面预览</h2>
   <p class="lead">以下截图取自应用运行界面（部分页面为示例数据，已隐去教师姓名等第三方信息）。</p>
@@ -79,16 +67,15 @@
 
   <h2>数据在哪里</h2>
   <p class="lead">
-    课表、成绩、个人资料与设置全部保存在应用私有目录，不上传到本站；
+    课表、成绩、个人资料与设置主要保存在应用私有目录；成功登录后，学号会发送至统计服务计算 HMAC 去重，仅保存摘要、用户 ID 和首次注册时间；
     只有你主动点「分享课表」时，才会把课表快照临时存到本站的口令服务，口令 30 天后自动失效；
     只有你主动点「提交反馈」时，才会把反馈文字、你填写的联系方式与所附图片发到本站。
-    登录教务系统用的账号口令在设备上加密保存：鸿蒙端用系统 HUKS 托管密钥，安卓端用 Android Keystore 包装的 AES 密钥，都不会明文落盘。
   </p>
 
   <div class="note">
     <strong>本站只用于展示应用信息。</strong>
     本站不提供安装包下载，也不做注册登录、不做推广与交易。
-    鸿蒙版通过华为应用市场发布与更新；安卓版 0.1.1 目前是验收包，只放在 GitHub Releases，尚未上架任何应用商店。
+    应用通过华为应用市场发布与更新，安装请前往应用市场搜索「福小外」。
   </div>
 
   <h2>权限说明</h2>
@@ -101,9 +88,6 @@
       <tr><td>相册与文件（按需）</td><td>更换头像、反馈时附加截图，由系统选择器单选</td><td>可拒绝，仅影响选图</td></tr>
     </tbody>
   </table>
-  <p class="lead">
-    安卓端权限与上表基本一致：网络、通知（上课提醒）、日历读写（导出课表）、图片选择（更换头像与反馈附图，Android 13 起使用系统照片选择器，不申请整个存储空间）。
-  </p>
 
   <h2>协议与政策</h2>
   <p class="lead">
@@ -121,7 +105,7 @@
 
 <footer>
   <div class="wrap">
-    <p>福小外 · 课表助手 &nbsp;|&nbsp; 版本 0.1.1（HarmonyOS ｜ Android）&nbsp;|&nbsp; 个人开发者</p>
+    <p>福小外 · 课表助手 &nbsp;|&nbsp; 版本 0.1.0 &nbsp;|&nbsp; 个人开发者</p>
     <p>本应用为个人开发的辅助工具，与任何学校官方无关；课表与成绩数据来自你自行登录的学校教务系统。</p>
     <!-- 备案号拿到后替换下一行，并链接 https://beian.miit.gov.cn -->
     <p>网站备案：申请中</p>

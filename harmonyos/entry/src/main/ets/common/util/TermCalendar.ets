@@ -1,3 +1,4 @@
+import { BeijingClock } from './BeijingClock';
 import { TimetableStateStore, TermMetadata } from '../../data/local/TimetableStateStore';
 /**
  * 学期日历：把"第几周"换算成具体的日期条。
@@ -26,16 +27,16 @@ export function weekDates(week: number): WeekDates {
   const monday: Date = new Date(termFirstMonday().getTime() + (week - 1) * 7 * DAY_MS);
   const dates: string[] = [];
   for (let i = 0; i < 7; i++) {
-    dates.push(new Date(monday.getTime() + i * DAY_MS).getDate().toString());
+    dates.push(new Date(monday.getTime() + i * DAY_MS).getUTCDate().toString());
   }
-  const month: string = `${monday.getMonth() + 1}月`;
+  const month: string = `${monday.getUTCMonth() + 1}月`;
   return { dates: dates, month: month, todayIndex: todayIndexIn(monday) };
 }
 
 /** 今天在第 week 周里的下标；不在本周返回 -1 */
 function todayIndexIn(monday: Date): number {
-  const now: Date = new Date();
-  const today: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const now: Date = BeijingClock.civil();
+  const today: Date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const diff: number = Math.round((today.getTime() - monday.getTime()) / DAY_MS);
   return diff >= 0 && diff < 7 ? diff : -1;
 }
@@ -44,13 +45,13 @@ function todayIndexIn(monday: Date): number {
 export function weekRangeLabel(week: number): string {
   const monday: Date = new Date(termFirstMonday().getTime() + (week - 1) * 7 * DAY_MS);
   const friday: Date = new Date(monday.getTime() + 4 * DAY_MS);
-  return `${monday.getMonth() + 1}/${monday.getDate()} – ${friday.getMonth() + 1}/${friday.getDate()}`;
+  return `${monday.getUTCMonth() + 1}/${monday.getUTCDate()} – ${friday.getUTCMonth() + 1}/${friday.getUTCDate()}`;
 }
 
 /** 今天落在第几周（用于启动时定位到当前周） */
 export function currentWeek(totalWeeks: number): number {
-  const now: Date = new Date();
-  const today: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const now: Date = BeijingClock.civil();
+  const today: Date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const diff: number = Math.floor((today.getTime() - termFirstMonday().getTime()) / DAY_MS);
   const w: number = Math.floor(diff / 7) + 1;
   if (w < 1) {
@@ -60,6 +61,6 @@ export function currentWeek(totalWeeks: number): number {
   return w > limit ? limit : w;
 }
 export function getTermConfig(): TermMetadata { return TimetableStateStore.term(); }
-export function termFirstMonday(): Date { return new Date(getTermConfig().startMonday + 'T00:00:00'); }
+export function termFirstMonday(): Date { return new Date(getTermConfig().startMonday + 'T00:00:00Z'); }
 
 

@@ -44,7 +44,7 @@ export function weekdayLabel(day: number): string {
   return idx >= 0 && idx < 7 ? `周${DAY_SHORT[idx]}` : `周${day}`;
 }
 
-/** 一行摘要：周一 3-4节 · 教4203 · 梁艳 */
+/** 一行摘要：周一 3-4节 · 示例教室 · 示例教师 */
 export function courseBrief(c: Course): string {
   const bits: string[] = [weekdayLabel(c.weekday), periodsLabel(c)];
   if (c.room.length > 0) {

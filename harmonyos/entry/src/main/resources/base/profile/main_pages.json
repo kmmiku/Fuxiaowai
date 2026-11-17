@@ -22,6 +22,8 @@
     "pages/ExamPage",
     "pages/ExamWebPage",
     "pages/FaqPage",
-    "pages/MorePage"
+    "pages/MorePage",
+    "pages/WorkbenchPage",
+    "pages/ServiceWebPage"
   ]
 }

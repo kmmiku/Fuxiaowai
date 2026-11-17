@@ -54,11 +54,11 @@ struct WidgetGuide {
           .alignItems(HorizontalAlign.Start)
 
           Column() {
-            Text('高级数据库技术')
+            Text('示例课程')
               .fontSize(13)
               .fontWeight(FontWeight.Medium)
               .fontColor(TC(this.dark).text)
-            Text('教4203 · 梁艳')
+            Text('示例教室 · 示例教师')
               .fontSize(Font.tiny)
               .fontColor(TC(this.dark).textSub)
               .margin({ top: 2 })
@@ -77,7 +77,7 @@ struct WidgetGuide {
             .fontSize(Font.tiny)
             .fontColor(TC(this.dark).textHint)
             .width(40)
-          Text('高性能系统架构')
+          Text('示例课程')
             .fontSize(13)
             .fontColor(TC(this.dark).text)
             .layoutWeight(1)

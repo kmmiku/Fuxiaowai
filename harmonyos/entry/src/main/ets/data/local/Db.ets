@@ -25,7 +25,8 @@ const SQL_COURSE: string = `CREATE TABLE IF NOT EXISTS course (
   start_period INTEGER NOT NULL,
   end_period INTEGER NOT NULL,
   weeks TEXT NOT NULL,
-  color_index INTEGER NOT NULL
+  color_index INTEGER NOT NULL,
+  color_override INTEGER NOT NULL DEFAULT 0
 )`;
 
 const SQL_TIMETABLE: string = `CREATE TABLE IF NOT EXISTS timetable (
@@ -79,6 +80,15 @@ export class Db {
       await store.executeSql("INSERT OR REPLACE INTO meta (key,value) VALUES ('account_schema','1')");
       store.commit();
     } catch (error) { store.rollBack(); throw new Error((error as Error).message || '账号数据迁移失败'); }
+  }
+
+  private static async migrateCourseColors(store: relationalStore.RdbStore): Promise<void> {
+    if (await Db.hasColumn(store, 'course', 'color_override')) { return; }
+    store.beginTransaction();
+    try {
+      await store.executeSql('ALTER TABLE course ADD COLUMN color_override INTEGER NOT NULL DEFAULT 0');
+      store.commit();
+    } catch (error) { store.rollBack(); throw new Error((error as Error).message || '课程颜色字段迁移失败'); }
   }
 
   static async claimLegacyAccount(user: string): Promise<void> {
@@ -146,6 +156,7 @@ export class Db {
     await store.executeSql(SQL_PERIOD);
     await store.executeSql(SQL_META);
     await Db.migrateAccounts(store);
+    await Db.migrateCourseColors(store);
     Db.rdb = store;
     hilog.info(DOMAIN, TAG, '%{public}s', 'db opened, version ready');
   }

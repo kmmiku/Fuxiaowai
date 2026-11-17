@@ -16,6 +16,7 @@ export interface CourseRepository {
   replaceAll(tableId: string, courses: Course[], clearGuest?: boolean, accountToken?: number,
     canCommit?: () => boolean): Promise<void>;
   add(course: Course, tableId: string): Promise<void>;
+  update(course: Course, tableId: string): Promise<void>;
   remove(courseId: string): Promise<void>;
   tables(): Promise<TimetableInfo[]>;
   createTable(name: string): Promise<TimetableInfo>;

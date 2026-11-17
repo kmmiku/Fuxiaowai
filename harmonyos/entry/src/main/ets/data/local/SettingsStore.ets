@@ -7,6 +7,8 @@ export interface AppSettings {
   showGhost: boolean;       // 是否显示非本周的课（其他周有、本周不上）
   density: number;          // 旧档位：0 紧凑 1 标准 2 宽松（仅用于迁移出 cellHeight）
   cellHeight: number;       // 课表格子高度 vp：CELL_MIN ~ CELL_MAX，无极调节
+  cellWidth: number;        // 旧绝对vp值，仅兼容读取
+  cellWidthRatio: number;   // 0自动，手动0.8～1
   dark: boolean;            // 深色模式
   theme: string;            // 主题标识：default / 后续扩展（当前仅占位）
   remindBefore: number;     // 上课提醒提前分钟数，0 表示关闭
@@ -18,6 +20,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   showGhost: false,
   density: 1,
   cellHeight: 60,
+  cellWidth: 0,
+  cellWidthRatio: 0,
   dark: false,
   theme: 'default',
   remindBefore: 0,
@@ -27,7 +31,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
 /** 行高可调范围（vp） */
 export const CELL_MIN: number = 40;
 export const CELL_MAX: number = 80;
-/** 课程块宽度：0 = 半列，0.5 = 正好一列（默认，滑块居中），1 = 1.5 列 */
 
 /** 旧版三档行高，仅用于把老数据迁移成连续值 */
 export const DENSITY_HEIGHT: number[] = [44, 52, 64];
@@ -64,7 +67,10 @@ export class SettingsStore {
         cellHeight: typeof saved.cellHeight === 'number' && !isNaN(saved.cellHeight)
           ? clamp(saved.cellHeight, CELL_MIN, CELL_MAX)
           : fallbackCell,
-        // 块宽语义改过两次（旧：1 = 占满一列；上次：0.5 = 占满一列；现在：0.7 = 占满一列），老值统一重置成默认
+        cellWidth: typeof saved.cellWidth === 'number' && isFinite(saved.cellWidth) && saved.cellWidth > 0
+          ? clamp(saved.cellWidth, 1, 55) : 0,
+        cellWidthRatio: typeof saved.cellWidthRatio === 'number' && isFinite(saved.cellWidthRatio) && saved.cellWidthRatio > 0
+          ? clamp(saved.cellWidthRatio, 0.8, 1) : 0,
         dark: saved.dark === true,
         theme: typeof saved.theme === 'string' && saved.theme.length > 0 ? saved.theme : 'default',
         remindBefore: saved.remindBefore > 0 ? saved.remindBefore : 0,

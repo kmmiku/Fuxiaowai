@@ -12,7 +12,7 @@
 | 设备 | `phone`、`tablet`；主 Ability 为 `singleton`、`exported` | [module.json5](../../entry/src/main/module.json5) |
 | 系统能力 | RDB、preferences、文件、HUKS、HTTP/TCP、zlib、WebView、日历、提醒、桌面卡片 | [模块地图](MODULE_MAP.md)、[状态地图](STATE_MAP.md) |
 | 自建后端 | 原生 Node.js `http`，CommonJS；`fs`、`crypto`、`zlib` 等内置模块，无 Web 框架 | [server.js](../../server/server.js) |
-| Web 内容 | 静态 HTML/CSS，仪表盘内联 JavaScript + `fetch` | [dashboard.html](../../server/dashboard.html)、[site/index.html](../../server/site/index.html) |
+| Web 内容 | 静态 HTML/CSS，仪表盘内联 JavaScript + `fetch`；下载引导页由独立 Node 服务监听 18080 | [dashboard.html](../../server/dashboard.html)、[site/index.html](../../server/site/index.html)、[download-center/index.html](../../server/download-center/index.html)、[download-center/server.js](../../server/download-center/server.js) |
 | 构建 | Hvigor `appTasks` / `hapTasks`、PowerShell、Java 签名工具，模板打包分支优先使用 Python | [工程任务](../../hvigorfile.ts)、[模块任务](../../entry/hvigorfile.ts)、[构建地图](BUILD_MAP.md) |
 | 测试 | Node.js 内置 test runner；ArkTS 经本机 SDK TypeScript 转译，OHOS 边界提供替身；SQLite、临时文件和本地 HTTP 用于部分真实集成验证 | [ets-loader.cjs](../../tests/ets-loader.cjs)、[storage.test.cjs](../../tests/storage.test.cjs)、[server-http.cjs](../../tests/server-http.cjs) |
 
@@ -88,6 +88,7 @@ flowchart TD
 - `HttpClient` 包装系统 HTTP；`RawHttp` 用 TCP 处理需要观察中间重定向的 HTTP。两条网络栈存在用途差异，见 [API 地图](API_MAP.md)。不能因为分享 API 是 HTTPS，就把学校 HTTP 链路描述为已加密传输。
 - 课程、成绩、凭据、个人资料和设置主要在本机；主动分享和反馈会上传指定数据。具体归属、保留与清理见 [数据库地图](DATABASE_MAP.md)。
 - Node 服务默认监听回环地址和 8080，nginx HTTPS 反代及 systemd 非 root 运行由本地示例描述。真实公网部署、证书和运行版本均待确认，本次没有访问生产。
+- 单独的 [下载引导服务](../../server/download-center/server.js) 监听公网 18080，仅服务发布页和图标；2026-11-16 已安装为 `fxw-download-center.service`，与原 8080 分享/反馈服务进程隔离。VPS 本机验证通过，外网端到端访问仍待确认，细节见 [API 地图](API_MAP.md) 与 [构建地图](BUILD_MAP.md)。
 
 ## 5. 三条核心调用链
 

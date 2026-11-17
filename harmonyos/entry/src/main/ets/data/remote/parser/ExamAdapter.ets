@@ -4,6 +4,8 @@ import { ExamRecord, examClockLabel, examDateLabel, parseExamTime } from '../../
 interface RawExam {
   kcmc?: string;
   kch?: string;
+  jsxm?: string;
+  xm?: string;
   kssj?: string;
   cdmc?: string;
   zwh?: string;
@@ -51,6 +53,7 @@ export class ExamAdapter {
         id: `${course}_${timeText}_${i}`,
         course: course,
         courseCode: str(r.kch),
+        teacher: str(r.jsxm) || str(r.xm),
         timeText: timeText,
         startAt: startAt,
         dateLabel: examDateLabel(timeText, startAt),

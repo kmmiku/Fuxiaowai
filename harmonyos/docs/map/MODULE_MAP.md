@@ -1,5 +1,7 @@
 # 模块地图
 
+2026-11-15 课程编辑补充：`CourseRepository`/`CourseRepositoryImpl` 新增 `update(course, tableId)`，`CourseDao.updateOne()` 只更新当前账号与课表中的原课程；`Course.displayedColorIndex()` 提供首课固定色与手选色优先级，`ShareApi` 在口令导入时校验并保留可选 `colorOverride`。
+
 核对日期：2026-11-14。权威来源为当前源码；本图仅导航，不承诺运行或编译通过。移动文件、改变入口、直接依赖或存储时更新。
 
 关联：[目录](README.md) · [项目](PROJECT_MAP.md) · [页面](PAGE_MAP.md) · [接口](API_MAP.md) · [数据库](DATABASE_MAP.md) · [组件](COMPONENT_MAP.md) · [构建](BUILD_MAP.md) · [状态](STATE_MAP.md)。
@@ -233,3 +235,26 @@ ShareCodeStore 新增 ShareCodeResult/extractShareCode；Index 当前分享不�
 CasTicket新增TicketLanding/isRedirect/resolveTarget/isLoginPage/isJwLanding；follow增加可选origin/priorPath/token并返回落地位置；mint不再仅检查旧JSESSIONID。ZhengfangAuth新增validTimetable，postTimetable保留响应及有限业务跳转，fetchTimetable对认证302/登录HTML仅恢复一次；CasAuth消费TicketLanding校验换票。未修改RawHttp传输或其他业务接口。
 
 问题证据与验证边界见 [Solution.md 的302问题](../../Solution.md)。
+
+## 2026-11-15｜更新链路
+UpdateCheck.ets不再是占位toast：checkForUpdate/announcement/install/previewUpdate连接官方更新检测、HTTPS公告、版本忽略及ComponentContent弹窗。新增ui/components/UpdateAnnouncement.ets，导出UpdateDialogParams与updateDialogBuilder。server/admin-console.js.handle新增公告公开与管理路由，admin.js新增loadUpdate，dashboard.html新增版本发布栏目。
+
+2026-11-15后续：版本发布后台已实际增量部署四个管理文件，发布/撤回/认证/同源校验通过；服务器经公网域名HTTPS的健康和公告接口均200，本机Windows直连TLS握手异常待确认。备份及回滚见根Solution.md“更新后台线上部署验收”。tools/deploy-app-update.py是有副作用的部署脚本，不自动运行。真实商店升级仍待确认。
+
+2026-11-15：data/remote/UserMetrics.ets由Locator.persist触发；server/user-metrics.js新增统计路由；user-metrics-ui.js与dashboard/admin.js新增用户列表和SVG每日新增折线；tools/deploy-user-metrics.py增量部署并回滚备份。
+
+2026-11-15：data/mock/MockData.ets仅保留legacyDemoIdHash及LEGACY_DEMO_ID_HASHES，不再导出MOCK_COURSES/MOCK_DATES；扫描报告docs/privacy-scan-20261115.md。
+
+2026-11-16：新增WorkbenchPage.ets/ServiceWebPage.ets两注册页面与media/workbench_header.png，常用组件内聚工作台；ExamRecord/ExamAdapter支持可选teacher(jsxm/xm)，GradePage复用原成绩查询；ServiceLocator清理新缓存。
+
+2026-11-16：pages/WorkbenchPage.ets（5服务/常用/顶部官网）、ServiceWebPage.ets（限定入口/JW Cookie边界），WorkBenchFavorites本地组件。ExamRecord增加可选teacher，ExamAdapter读取jsxm/xm。GradePage复用原成绩链改为工作台内页；两新路由在main_pages.json。
+
+2026-11-16 安卓最新自适应/课程文字/日视图迁移（替换此前宽度方案）：新增common/util/CellWidth.ets（widthMin/widthMax/effectiveWidth）和CourseTextLayout.ets（wrappedLineCount/courseNameLines），均纯计算，使用方TimetableSettings/TimetableGrid及CourseBlock；测试settings-width.cjs覆盖跨屏/兼容/行数留位。
+
+2026-11-16：新增common/util/CellWidth.ets（widthMin/widthMax/effectiveWidth，实测80%～100%范围与比例兼容）；common/util/CourseTextLayout.ets（wrappedLineCount/courseNameLines/fixedRoomCode，测量分配与教室两行格式）。调用方TimetableGrid、TimetableSettings、CourseBlock；测试tests/settings-width.cjs。
+
+2026-11-16 日视图时间配色逻辑：新增common/util/DayCourseStatus.ets::hasCourseEnded(end,now)，由DayList调用；tests/day-course-status.cjs验证课前/课中/结束边界、自定义时间与异常格式。
+
+2026-11-16 联网北京时间：新增BeijingClock纯时钟（now绝对毫秒、civil为UTC+8字段、dayKey）与ClockSync网络层，EntryAbility启动，5分钟重新校准。
+
+2026-11-16 工作台常用功能退役：WorkbenchPage删除LongPressGesture、菜单遮罩、添加/移除/查看常用、WorkbenchFavorites弹层及preferences读写/状态。五项服务及官网点击入口不变。PrivacyDocPage删除常用收集条目，ServiceLocator仍清理旧fxw_workbench数据以兼容历史版本；不自动清除用户其他数据。

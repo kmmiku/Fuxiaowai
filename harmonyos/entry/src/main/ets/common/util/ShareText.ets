@@ -7,7 +7,7 @@ const DAY_NAMES: string[] = ['周一', '周二', '周三', '周四', '周五', '
  * 把某一周的课表拼成纯文本，用于复制/分享。
  * 形如：
  *   福小外 · 第11周（11/9 – 11/13）
- *   周一 1-2 高级数据库技术 @教4203 梁艳
+ *   周一 1-2 示例课程 @示例教室 示例教师
  */
 export function buildWeekText(week: number, courses: Course[], periods: Period[]): string {
   const lines: string[] = [];

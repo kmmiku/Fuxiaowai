@@ -1,3 +1,4 @@
+import { ClockSync } from '../data/remote/ClockSync';
 import UIAbility from '@ohos.app.ability.UIAbility';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import Want from '@ohos.app.ability.Want';
@@ -13,6 +14,7 @@ const TAG: string = 'Fuxiaowai';
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'EntryAbility onCreate');
+    ClockSync.start();
     this.init().catch((e: BusinessError) => {
       hilog.error(DOMAIN, TAG, 'init failed: %{public}s', JSON.stringify(e));
     });

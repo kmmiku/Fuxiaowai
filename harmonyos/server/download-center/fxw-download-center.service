@@ -1,0 +1,27 @@
+[Unit]
+Description=Fuxiaowai third-party download guide
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/fxw-download-center
+Environment=FXW_DOWNLOAD_BIND=0.0.0.0
+Environment=FXW_DOWNLOAD_PORT=18080
+ExecStart=/usr/bin/node /opt/fxw-download-center/server.js
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryMax=64M
+LimitNOFILE=1024
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=fxw-download-center
+
+[Install]
+WantedBy=multi-user.target

@@ -148,6 +148,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\验包.ps1
 | [deploy.sh](../../server/deploy.sh) | 要求 root 与既有环境文件；创建服务账号/目录，复制源码、安装 unit、enable/restart、请求本机 healthz |
 | [OPERATIONS.md](../../server/OPERATIONS.md) | 单进程假设、配额、日志和数据保留期、备份恢复操作说明 |
 
+第三方下载引导页位于 [server/download-center](../../server/download-center/)；[server.js](../../server/download-center/server.js) 默认监听 `0.0.0.0:18080`，服务单元为 [fxw-download-center.service](../../server/download-center/fxw-download-center.service)，操作说明见 [DEPLOY.md](../../server/download-center/DEPLOY.md)。2026-11-16 已部署到 `/opt/fxw-download-center`，systemd active，UFW已放行TCP 18080；页面、图标、unit远端SHA-256与本地一致，VPS本机页面/图标检查200，原 `fxw-share` 仍active。访问形式 `http://<VPS公网IP>:18080/`，不依赖域名或改原443/8080监听。此直连方式无TLS；当前执行环境外网HTTP代理返回502、绕过代理为无响应，其他网络可达性、云安全组与备案过滤待确认。2026-11-16 页面更新重新部署后，本地/VPS HTML SHA-256一致，SFTP读回确认 Android 与 HarmonyOS 链接、`.hap` 安装提示及图标资源，两个 systemd 服务仍active；随后按用户提供的双图标原图裁出 `android-logo.jpg` 与 `harmony-logo.jpg`，扩展静态白名单并同步部署。四个文件重部署后哈希均匹配，两个服务仍active；未改 unit、端口或分享服务。蓝奏云原生自动填码行为未确认。
+
 从 `server/` 目录执行 `bash deploy.sh` 会真实修改 Linux 主机、服务与文件，不是验证或只读命令。示例与实际生产配置是否一致待确认；本轮不自动部署。
 
 ## 7. Git 与长期维护
@@ -173,3 +175,31 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\验包.ps1
 
 
 周数滑块本次构建/安装/运行证据见 [验收记录](../week-slider-20261114.md)。
+
+## 2026-11-15｜启动更新验收
+最终79项测试78通过、1跳过，release构建UTC 2026-11-15T01:47:16.1769272Z，清单source哈希一致；本次HAP SHA256 e6f81094a7bc589667f189ff8799cd722c3f803e08927907aa7f378931931291，已替换安装并启动127.0.0.1:5555模拟器，预览公告实际呈现。Edge桌面与390px后台发布/撤回通过。生产尚未部署、真实市场升级待确认。详见根Solution.md“启动更新与后台公告”。
+
+2026-11-15后续：版本发布后台已实际增量部署四个管理文件，发布/撤回/认证/同源校验通过；服务器经公网域名HTTPS的健康和公告接口均200，本机Windows直连TLS握手异常待确认。备份及回滚见根Solution.md“更新后台线上部署验收”。tools/deploy-app-update.py是有副作用的部署脚本，不自动运行。真实商店升级仍待确认。
+
+## 2026-11-15｜更新图标灰色与首次课表提示
+ProfilePage.rowItem取消更新图标text特例，统一次级灰色sub。Index.reloadTables先等待Locator.init及ensureSeed，再读取表列表；异常保留现有列表并仅固定日志，不再弹读取课表失败。首次原始异常无日志保留，初始化竞态为源码确认的风险，不记为已复现唯一根因。
+78项测试通过、1跳过，release构建通过，清单源哈希全部一致。构建UTC 2026-11-15T02:10:24.2628280Z，HAP SHA256 9afa86c8b5e69ab734107c06ac554920b5b9a50dce0ea4cae7f60743ddf072f7。hdc替换安装在线127.0.0.1:5555并启动EntryAbility，保留我的页供验收；未清除用户数据，未复现全新安装场景。
+
+## 2026-11-15｜v0.1.1签名HAP
+AboutPage版本显示去掉开发版，显示v0.1.1；应用身份versionName=0.1.1、versionCode=1000001。78项测试通过、1跳过，release构建与清单source哈希通过；发布证书/Profile配对、签名块、APP结构、包内HAP一致性通过。正式签名HAP dist\福小外-0.1.1-signed.hap SHA256 95e9bb834090644f7e0ef581080f5bfd3a7319aa370af0f2a8290d23f473726e，构建UTC 2026-11-15T02:14:03.6897310Z；同一HAP已替换安装127.0.0.1:5555并启动EntryAbility。验包不等于AGC受理通过。更新检测调用华为updateManager.checkAppUpdate，系统升级界面调用showUpdateDialog；自建/api/app-update只提供公告，无离线Push Kit推送。后续商店升级需递增versionCode并发布新版本。
+
+2026-11-15：登录统计后端增量部署入口tools/deploy-user-metrics.py（读取工程外密码、备份、补丁、语法校验、重启与healthz检查），执行会改变线上服务；本次已部署，实际证据见Solution.md。
+
+2026-11-15隐私版HAP：dist/福小外-0.1.1-privacy-20261115-unsigned.hap，无发行签名；已知演示文本与敏感容器检查及模拟器安装证据见docs/privacy-scan-20261115.md。
+
+2026-11-16工作台HAP：dist/福小外-0.1.1-workbench-20261116-unsigned.hap。最新release已构建并覆盖安装设备127.0.0.1:5557，证据与边界见Solution.md；无正式签名/后台公告变更。
+
+2026-11-16：下载页两个平台图标改为 HTML 内嵌 JPEG data URI，浏览器无需单独请求图片路径；图片内容沿用用户提供的左右图标裁切。
+
+2026-11-16：Android 与 HarmonyOS 下载入口更新为用户本轮提供的新链接；静态 HTML 已同步 VPS，VPS 本机 HTTP 返回内容与本地 SHA-256 一致，两个链接及内嵌图标标记已核对。
+
+2026-11-16：下载页在两张下载卡片之后、第三方提示之前新增 QQ 反馈卡片；用户提供的二维码随 HTML 内嵌，提供保存图片和复制群号（HTTP 下使用 execCommand 后备，失败显示手动复制提示）。已部署并确认 VPS 本机 HTTP 返回与本地 HTML 哈希一致。浏览器交互结果另见实际验收，未验证移动端 QQ 识别及加群。
+
+2026-11-16：反馈卡片的保存二维码按钮替换为用户提供的 QQ 加群链接按钮，新窗口打开；保留内嵌二维码和复制群号。已部署，VPS 本机 HTTP 页面与本地哈希一致；真实 QQ 唤起及加群结果待用户验收。地图不记录链接中的授权参数。
+
+2026-11-17：鸿蒙下载入口更新为用户本轮提供的新蓝奏云链接，保留提取码参数；已同步 VPS，VPS 本机 HTTP 返回与本地 HTML 哈希一致，安卓入口保持原值。

@@ -9,7 +9,7 @@ import { BottomTabs } from '../ui/components/BottomTabs';
 import { LineIcon } from '../ui/components/LineIcon';
 import { Profile, ProfileStore } from '../data/local/ProfileStore';
 import { AvatarStore } from '../data/local/AvatarStore';
-import { checkForUpdate } from '../common/util/UpdateCheck';
+import { checkForUpdate, previewUpdate } from '../common/util/UpdateCheck';
 
 interface MenuRow {
   key: string;
@@ -142,7 +142,7 @@ struct ProfilePage {
 
   private open(key: string): void {
     if (key === 'update') {
-      checkForUpdate();
+      checkForUpdate(getContext(this) as common.UIAbilityContext, this.getUIContext());
       return;
     }
     if (key === 'info') {
@@ -295,7 +295,7 @@ struct ProfilePage {
         LineIcon({
           name: r.icon,
           iconSize: quiet ? 17 : 19,
-          tone: r.key === 'update' ? 'text' : (quiet ? 'sub' : 'pri'),
+          tone: quiet ? 'sub' : 'pri',
           strokeW: 1.6
         })
       }
@@ -336,6 +336,9 @@ struct ProfilePage {
     .onClick(() => {
       this.open(r.key);
     })
+    .gesture(LongPressGesture({ repeat: false }).onAction(() => {
+      if (r.key === 'update') { previewUpdate(this.getUIContext()); }
+    }))
   }
 
   @Builder

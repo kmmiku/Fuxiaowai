@@ -6,6 +6,7 @@ export interface ExamRecord {
   course: string;
   /** 课程号，可能为空 */
   courseCode: string;
+  teacher?: string;
   /** 原始时间文本，如 2026-01-12 09:00~11:00 */
   timeText: string;
   /** 解析出的开考时间戳（毫秒）；解析失败为 0 */

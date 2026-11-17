@@ -1,5 +1,9 @@
 # 状态与生命周期地图
 
+2026-11-15 跨 Tab 首帧跳变修复：`BottomTabs.navigate()` 仍用 `router.replaceUrl()` 新建 Index；`Index.restoreView()` 在首帧前按账号代次/数据库账号/课表 ID 恢复同进程快照，`refreshPage()` 合并 `aboutToAppear/onPageShow` 的重复装载，`captureView()` 只保留成功加载后的课表。`TimetableGrid.colW()` 不再用 80vp 下限，而以页面可用宽度或同布局上次实测列宽起算。三条 Tab 返回课程的模拟器截图均显示正常列位；严格逐帧与真机待确认。
+
+2026-11-15 课程编辑状态补充：`AddCoursePage` 用 `editCourse` 保存原课程身份，`weeksChanged=false` 时原样保留离散周次，`colorChosen` 标记用户明确选色；`Index.gridRevision` 仅在 `listAll()` 返回的全表数据变化后递增，以刷新缓存的周页。编辑与新增均复用当前账号课表仓储，教务重新同步仍会整表替换本地手改课程。
+
 核对日期：2026-11-14。源码是权威；此图描述当前控制流及保护范围，不保证运行正确。账号状态、异步任务、存储键、清理顺序、页面生命周期改变时更新。
 
 关联：[目录](README.md) · [项目](PROJECT_MAP.md) · [模块](MODULE_MAP.md) · [页面](PAGE_MAP.md) · [接口](API_MAP.md) · [数据库](DATABASE_MAP.md) · [组件](COMPONENT_MAP.md) · [构建](BUILD_MAP.md)。
@@ -114,3 +118,32 @@ Index.week 为已提交周，previewWeek 为菜单临时预览，weekSliding/ we
 302恢复不创建新的账号代次，沿用fetchTimetable捕获的token；mint入口捕获token并传follow，各请求前/后及吸收Cookie前复查。账号失效后禁止继续恢复与发布课表；有效教务业务落地不等于课表导入成功，后续必须返回合法kbList JSON。失败仍由现有同步源/事务机制保留原课表。
 
 问题证据与验证边界见 [Solution.md 的302问题](../../Solution.md)。
+
+## 2026-11-15｜更新检查
+UpdateCheck模块busy合并并发、startupChecked使每进程自动检测一次，dialog防重复展示。Index.aboutToAppear触发自动检查，菜单与ProfilePage手动检查绕过ignoredVersion；只有市场确认新版且公告versionCode高于当前安装版本才展示公告和忽略选项。网络失败自动静默、手动提示失败。版本公告与市场灰度版本的对应关系需管理员确保，官方普通应用接口无法返回目标版本号。
+
+## 2026-11-15｜图标与首次加载
+Index.reloadTables等待初始化及默认表创建后查询；异常保留现有列表并记录固定日志，不弹读取课表失败。
+
+2026-11-15：成功persist且AccountScope代次有效后异步reportLoginMetric；失败静默，不新增本地学号存储或重试队列。后端单进程Promise队列串行原子写摘要，重复摘要不增人数；不具备服务器验证学校身份能力。
+
+2026-11-16：工作台常用读写检查AccountScope owner/token；考试页请求捕获年/学期/请求代次，SchoolTraffic队列只执行当前代次，返回时复查再发布。服务网页在加载时检查账号代次，退出页面stop，官网临时页不操作全局Cookie。
+
+
+2026-11-16 格子宽度：宽度拖动只更新liveWidthScale并共用dragging半透明预览，End/Click写入设置。重新进入按实测列宽恢复vp显示，Index载入设置后重建相应网格。
+
+2026-11-16 宽度重叠修正：上条0.875～1.25范围已替换为0.875～1；SettingsStore.load夹回旧超限值，TimetableGrid.blockW按子列unit-1设上限（移除14vp最小宽导致的多列越界）。设置页P1布局为格子高度/格子宽度、下方灰色vp、蓝色滑块，无底部范围文字；宽度0.1vp步进。原背景/面板opacity未改。
+
+2026-11-16 安卓列宽方案替换此前卡片缩放方案：liveWidth拖动即时更新预览，松手/点击保存cellWidth。0为未手动设置的自动布局；手动后横向手势用于滚动不翻周，Index网格key含cellWidth。无新增权限或账号数据变化。
+
+2026-11-16 安卓最新自适应/课程文字/日视图迁移（替换此前宽度方案）：周浏览week与日视图当天displayedWeek分离；toggleView换内容时refreshDates，onWeekChange仍刷新周浏览，日课程过滤使用当天周。openDetail捕获detailWeek，后续编辑/删除使用该上下文，避免混用浏览周；切回周视图保留旧week。未新增跨午夜计时器。宽度liveRatio/旧值在保存时同步转换，避免高度保存导致预览跳变。
+
+2026-11-16 安卓最终方案同步：周浏览week独立于日视图displayedWeek；toggleView切换后refreshDates，详情打开捕获detailWeek，避免日视图操作错误周。列宽比例随布局测量适配，legacyWidth只兼容首次读取，保存时同步liveRatio避免预览跳变。
+
+2026-11-16 日视图时间配色逻辑：DayList.clockTime为显示状态，不持久化；aboutToAppear校正时钟并启动1秒刷新，aboutToDisappear取消；无效/缺失结束时间按未结束处理，避免误标已完成。
+
+2026-11-16 联网北京时间：校准基于systemDateTime.STARTUP单调时间，系统时间调整不影响校准后推进；离线保留当次进程校准，冷启离线用Date.now。无跨重启持久化。Index收clockEpoch并在北京时间日期变化时刷新日期；若仍浏览旧当前周则跟到新当前周，其他浏览周保留。
+
+2026-11-16 工作台常用功能退役：WorkbenchPage删除LongPressGesture、菜单遮罩、添加/移除/查看常用、WorkbenchFavorites弹层及preferences读写/状态。五项服务及官网点击入口不变。PrivacyDocPage删除常用收集条目，ServiceLocator仍清理旧fxw_workbench数据以兼容历史版本；不自动清除用户其他数据。
+
+2026-11-17 成绩/考试按安卓当前开发日志复刻：GradePage.draftTerm与activeTerm分离，滚动不立即生效；ExamPage.draftTerm完成后选year/term并查询。保留Grade账号代次/缓存防陈旧数据与Exam请求代次；取消滚轮不提交。

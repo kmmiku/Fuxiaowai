@@ -6,7 +6,7 @@ import { scopedCourseId } from '../../../domain/model/CourseValidation';
 
 const COLS: string[] = [
   'id', 'table_id', 'name', 'teacher', 'room', 'campus',
-  'weekday', 'start_period', 'end_period', 'weeks', 'color_index'
+  'weekday', 'start_period', 'end_period', 'weeks', 'color_index', 'color_override'
 ];
 
 function toBucket(c: Course, tableId: string, account: string): relationalStore.ValuesBucket {
@@ -22,7 +22,8 @@ function toBucket(c: Course, tableId: string, account: string): relationalStore.
     'start_period': c.startPeriod,
     'end_period': c.endPeriod,
     'weeks': c.weeks.join(','),
-    'color_index': c.colorIndex
+    'color_index': c.colorIndex,
+    'color_override': c.colorOverride === true ? 1 : 0
   };
   return bucket;
 }
@@ -42,7 +43,8 @@ function toCourse(rs: relationalStore.ResultSet): Course {
     startPeriod: rs.getLong(rs.getColumnIndex('start_period')),
     endPeriod: rs.getLong(rs.getColumnIndex('end_period')),
     weeks: weeks,
-    colorIndex: rs.getLong(rs.getColumnIndex('color_index'))
+    colorIndex: rs.getLong(rs.getColumnIndex('color_index')),
+    colorOverride: rs.getLong(rs.getColumnIndex('color_override')) === 1
   };
   return course;
 }
@@ -110,6 +112,14 @@ export class CourseDao {
   static async insertOne(tableId: string, course: Course, account: string = Db.accountUser()): Promise<void> {
     const store: relationalStore.RdbStore = Db.store();
     await store.insert('course', toBucket(course, tableId, account));
+  }
+
+  static async updateOne(tableId: string, course: Course, account: string = Db.accountUser()): Promise<void> {
+    const store: relationalStore.RdbStore = Db.store();
+    const p: relationalStore.RdbPredicates = new relationalStore.RdbPredicates('course');
+    p.equalTo('account_id', account).equalTo('table_id', tableId).equalTo('id', course.id);
+    const changed: number = await store.update(toBucket(course, tableId, account), p);
+    if (changed !== 1) { throw new Error('原课程不存在或账号已切换'); }
   }
 
   static async remove(courseId: string, account: string = Db.accountUser()): Promise<void> {

@@ -2,7 +2,7 @@ import router from '@ohos.router';
 import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 import { COURSE_COLORS, Font, Metric, Palette, TC } from '../common/design/Tokens';
-import { Course, DEFAULT_PERIODS, Period } from '../domain/model/Course';
+import { Course, DEFAULT_PERIODS, Period, displayedColorIndex } from '../domain/model/Course';
 import { Locator } from '../app/di/ServiceLocator';
 import { Db } from '../data/local/Db';
 import { PeriodStore } from '../data/local/PeriodStore';
@@ -11,6 +11,7 @@ interface RouteParams {
   tableId?: string;
   tableName?: string;
   week?: number;
+  editId?: string;
 }
 
 const PARITY_ALL: number = 0;
@@ -145,6 +146,10 @@ struct AddCoursePage {
   @State periods: Period[] = DEFAULT_PERIODS;
   @State busy: boolean = false;
   @State errMsg: string = '';
+  @State editCourse: Course | null = null;
+  @State colorChosen: boolean = false;
+  @State weeksChanged: boolean = false;
+  @State weekHintText: string = '';
 
   private weekdays: string[] = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
   private campuses: string[] = ['长乐校区', '滨海校区'];
@@ -160,8 +165,38 @@ struct AddCoursePage {
         this.weekStart = p.week;
         this.weekEnd = Math.min(p.week + 15, this.totalWeeks);
       }
+      if (p.editId) { this.loadEdit(p.editId); }
     }
+    this.weekHintText = this.weeksHint();
     this.loadPeriods();
+  }
+
+  private async loadEdit(id: string): Promise<void> {
+    try {
+      const ctx: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
+      await Locator.init(ctx);
+      const courses: Course[] = await Locator.repo().listAll(this.tableId);
+      const c: Course | undefined = courses.find((item: Course) => item.id === id);
+      if (!c) { this.errMsg = '原课程已不存在'; return; }
+      this.name = c.name;
+      this.teacher = c.teacher;
+      this.room = c.room;
+      this.campus = c.campus;
+      this.weekday = c.weekday;
+      this.startPeriod = c.startPeriod;
+      this.endPeriod = c.endPeriod;
+      this.weekStart = Math.min(...c.weeks);
+      this.weekEnd = Math.max(...c.weeks);
+      this.parity = c.weeks.every((w: number) => w % 2 === 1) ? PARITY_ODD :
+        (c.weeks.every((w: number) => w % 2 === 0) ? PARITY_EVEN : PARITY_ALL);
+      const first: number = Math.min(...courses.filter((item: Course) => item.weekday === c.weekday)
+        .map((item: Course) => item.startPeriod));
+      this.colorIndex = displayedColorIndex(c, c.startPeriod === first && c.endPeriod - c.startPeriod + 1 < 6);
+      this.editCourse = c;
+      this.weekHintText = `${Math.min(...c.weeks)}–${Math.max(...c.weeks)} 周 · 共 ${c.weeks.length} 周`;
+    } catch (e) {
+      this.errMsg = '读取课程失败：' + (e instanceof Error ? e.message : JSON.stringify(e));
+    }
   }
 
   private async loadPeriods(): Promise<void> {
@@ -251,6 +286,7 @@ struct AddCoursePage {
   }
 
   private buildWeeks(): number[] {
+    if (this.editCourse && !this.weeksChanged) { return this.editCourse.weeks; }
     const out: number[] = [];
     for (let w = this.weekStart; w <= this.weekEnd; w++) {
       if (this.parity === PARITY_ODD && w % 2 === 0) {
@@ -274,7 +310,7 @@ struct AddCoursePage {
     }
     const parityText: string = this.parity === PARITY_ODD ? '（单周）'
       : (this.parity === PARITY_EVEN ? '（双周）' : '');
-    return `${this.weekStart}–${this.weekEnd} 周${parityText} · 共 ${list.length} 周`;
+    return `${list[0]}–${list[list.length - 1]} 周${parityText} · 共 ${list.length} 周`;
   }
 
   private periodTimeLabel(): string {
@@ -316,7 +352,7 @@ struct AddCoursePage {
         await Locator.init(ctx);
       }
       const c: Course = {
-        id: `c_${Date.now()}`,
+        id: this.editCourse ? this.editCourse.id : `c_${Date.now()}`,
         name: nm,
         teacher: this.teacher.trim(),
         room: this.room.trim(),
@@ -325,11 +361,16 @@ struct AddCoursePage {
         startPeriod: this.startPeriod,
         endPeriod: this.endPeriod,
         weeks: weeks,
-        colorIndex: this.colorIndex
+        colorIndex: this.editCourse && !this.colorChosen ? this.editCourse.colorIndex : this.colorIndex,
+        colorOverride: this.colorChosen || (this.editCourse?.colorOverride === true)
       };
-      await Locator.repo().add(c, this.tableId);
+      if (this.editCourse) {
+        await Locator.repo().update(c, this.tableId);
+      } else {
+        await Locator.repo().add(c, this.tableId);
+      }
       hilog.info(0x0022, 'FuxiaoAdd', 'insert ok, id=%{public}s', c.id);
-      this.getUIContext().getPromptAction().showToast({ message: '已添加', duration: 1400 });
+      this.getUIContext().getPromptAction().showToast({ message: this.editCourse ? '已保存' : '已添加', duration: 1400 });
       router.back();
     } catch (e) {
       hilog.error(0x0022, 'FuxiaoAdd', 'insert failed: %{public}s',
@@ -368,7 +409,7 @@ struct AddCoursePage {
           .fontColor(TC(this.dark).text)
           .width(40)
           .onClick(() => router.back())
-        Text('添加课程')
+        Text(this.editCourse ? '编辑课程' : '添加课程')
           .fontSize(Font.title)
           .fontWeight(FontWeight.Bold)
           .fontColor(TC(this.dark).text)
@@ -521,7 +562,19 @@ struct AddCoursePage {
 
           // 周次
           Column() {
-            this.sectionTitle('周次', this.weeksHint())
+            Row() {
+              Text('周次')
+                .fontSize(Font.section)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(TC(this.dark).text)
+              Blank()
+              Text(this.weekHintText)
+                .fontSize(Font.small)
+                .fontColor(TC(this.dark).textHint)
+                .maxLines(1)
+            }
+            .width('100%')
+            .margin({ bottom: 10 })
             Row() {
               Text('从')
                 .fontSize(Font.body)
@@ -534,6 +587,8 @@ struct AddCoursePage {
                 maxValue: this.weekEnd,
                 onChange: (v: number) => {
                   this.weekStart = v;
+                  this.weeksChanged = true;
+                  this.weekHintText = this.weeksHint();
                 }
               })
               Blank()
@@ -548,6 +603,8 @@ struct AddCoursePage {
                 maxValue: this.totalWeeks,
                 onChange: (v: number) => {
                   this.weekEnd = v;
+                  this.weeksChanged = true;
+                  this.weekHintText = this.weeksHint();
                 }
               })
             }
@@ -558,18 +615,24 @@ struct AddCoursePage {
                 dark: this.dark, text: '全部周', active: this.parity === PARITY_ALL,
                 onTap: () => {
                   this.parity = PARITY_ALL;
+                  this.weeksChanged = true;
+                  this.weekHintText = this.weeksHint();
                 }
               })
               PickChip({
                 dark: this.dark, text: '单周', active: this.parity === PARITY_ODD,
                 onTap: () => {
                   this.parity = PARITY_ODD;
+                  this.weeksChanged = true;
+                  this.weekHintText = this.weeksHint();
                 }
               })
               PickChip({
                 dark: this.dark, text: '双周', active: this.parity === PARITY_EVEN,
                 onTap: () => {
                   this.parity = PARITY_EVEN;
+                  this.weeksChanged = true;
+                  this.weekHintText = this.weeksHint();
                 }
               })
               Blank()
@@ -579,6 +642,8 @@ struct AddCoursePage {
                   this.weekStart = 1;
                   this.weekEnd = this.totalWeeks;
                   this.parity = PARITY_ALL;
+                  this.weeksChanged = true;
+                  this.weekHintText = this.weeksHint();
                 }
               })
             }
@@ -594,7 +659,7 @@ struct AddCoursePage {
           // 颜色
           Column() {
             this.sectionTitle('颜色', '')
-            Row({ space: 12 }) {
+            Row({ space: 5 }) {
               ForEach(COURSE_COLORS, (pair: string[], i: number) => {
                 Stack() {
                   if (this.colorIndex === i) {
@@ -608,14 +673,13 @@ struct AddCoursePage {
                   Circle()
                     .width(30)
                     .height(30)
-                    .fill(pair[0])
-                    .stroke(pair[1])
-                    .strokeWidth(3)
+                    .fill(pair[1])
                 }
                 .width(38)
                 .height(38)
                 .onClick(() => {
                   this.colorIndex = i;
+                  this.colorChosen = true;
                 })
               }, (pair: string[], i: number) => `${i}`)
             }
@@ -635,7 +699,8 @@ struct AddCoursePage {
               .padding({ left: 4, top: 10 })
           }
 
-          Text('手动添加的课程保存在本课表；从教务重新同步会整表替换，手加课会被覆盖')
+          Text(this.editCourse ? '课程修改保存在本课表；从教务重新同步会整表替换，手动修改会被覆盖' :
+            '手动添加的课程保存在本课表；从教务重新同步会整表替换，手加课会被覆盖')
             .fontSize(Font.small)
             .fontColor(TC(this.dark).textHint)
             .width('100%')

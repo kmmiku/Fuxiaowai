@@ -1,5 +1,11 @@
 # 页面 Map
 
+2026-11-15 跨 Tab 首帧修复：`Index.aboutToAppear()` 先 `restoreView()` 再建周页；`onPageShow()` 与初始化共用 `refreshPage()`，节次/设置完成后由 `loadAll()` 读取课表。`restoreView/captureView` 的内存快照受账号代次、数据库账号和课表 ID 限制；`loadCourses()` 读取成功时更新快照，失败时保留已显示数据。跨 Tab 模拟器检查见根 Solution.md。
+
+2026-11-15 课程编辑补充：`Index.courseDetailSheet()` 的 `onEdit` 现调用 `editCourse()`，携带 `tableId/week/editId` 进入 `pages/AddCoursePage`；周课表和日课表卡片均经 `openDetail()` 到达。`AddCoursePage.loadEdit()` 预填原课程，`save()` 按编辑状态调用 `CourseRepository.update()`，未改周次时保留原始离散周次；八色实心选色后写入 `colorOverride`。`Index.loadCourses()` 仅在全表数据签名变化时递增 `gridRevision` 重建已缓存周页。
+
+2026-11-15 课表卡片补充：`Index.gridCard()` 向 `TimetableGrid` 传入至少 68vp 的显示行高，`gridHeight()` 同步使用该行高，保留已保存的行高设置值。横向翻周仍为原生 `Swiper`，纵向边缘回弹仍为首页 `Scroll().edgeEffect(EdgeEffect.Spring)`；手势观感待模拟器验收。
+
 更新：2026-11-14。依据当前实际源码静态核对；未启动应用、构建或执行测试。运行时、网络、系统授权与视觉效果待确认。源码行号为当前快照。仅记录字段名及表达式，不记录真实个人信息、密码、cookie、token值。
 
 关联：[总览](README.md) · [项目](PROJECT_MAP.md) · [模块](MODULE_MAP.md) · [页面](PAGE_MAP.md) · [组件](COMPONENT_MAP.md) · [接口](API_MAP.md) · [数据库](DATABASE_MAP.md) · [状态](STATE_MAP.md) · [构建](BUILD_MAP.md)。
@@ -941,3 +947,48 @@ Index.weekPanel 的 Slider/value 与右上周数字使用 previewWeek；Begin/Mo
 ProfilePage.subRows 在 network 与 more 之间增加 update（检查更新，download图标）；open(update) 与 Index.onFunctionTap(update) 同调 UpdateCheck.checkForUpdate，当前仍提示版本0.1.1及未接入在线更新服务，不发网络请求。
 
 本次检查更新入口验证：release构建成功，66测试通过、1跳过；builtAt UTC 2026-11-14T13:24:46.2817028Z，源码哈希匹配，HAP SHA256 29ADE2D299FDC796BC339225B4275691084D17F5279B8A79E6B5CE04D875EEB5。hdc 127.0.0.1:5555 替换安装并启动 EntryAbility，实际打开我的页滚动到底，确认网络检测→检查更新→更多顺序及download图标；点击显示与菜单共用的未接入更新服务提示。实拍在工程外 D:/fxw_build/qa-update-entry/entry.jpeg、clicked.jpeg。未提交Git。
+
+## 2026-11-15｜版本更新入口
+Index.aboutToAppear调用checkForUpdate自动检查，每进程一次；Index菜单和ProfilePage检查更新调用共用入口并传UIContext。ProfilePage长按检查更新提供标注示例的预览。后台dashboard.html新增版本发布工作区，由admin.js loadUpdate和PUT/DELETE接口管理；轮询不覆盖正在编辑的公告表单。
+
+## 2026-11-15｜图标与首次加载
+ProfilePage.rowItem取消更新图标text特例，次级区统一sub灰色。Index.reloadTables先await Locator.init与ensureSeed，查询失败保留列表、不再弹读取课表失败，仅固定日志。
+
+2026-11-15：AboutPage版本行显示v0.1.1，去除开发版后缀。
+
+2026-11-15：后台dashboard增加users页，user-metrics-ui.js读取受认证/api/admin/users，分页序号/首次日期、累计数与近30日折线；PrivacyDocPage与网站privacy.html说明成功登录统计及HTTP风险，无新增系统权限。
+
+后台用户列表导航固定在codes与feedback之间；线上为harmony/android版本页，users必须同时注册loadPage及navigate白名单。2026-11-15已补齐线上入口。
+
+2026-11-15用户列表：累计注册人数/最近7天新增注册人数面积折线（网格/数据点/标签），列表用户ID与注册时间；不展示统计机制说明、时区文案或MAC。
+
+2026-11-15隐私复查：PrivacyDocPage/AboutPage改为准确描述登录统计及HTTP风险；WidgetGuide使用通用示例。Index旧演示迁移从MockData.LEGACY_DEMO_ID_HASHES/legacyDemoIdHash匹配，不再引用明文MOCK_COURSES。
+
+## 2026-11-16 鸿蒙工作台迁移（实现与验收中）
+基准为安卓Map/solution.md最后“工作台P1卡片版已实施并安装”与Toolbox.md当前有效范围；APK SHA256与workbench-cards-delivery.json一致（4FEF1E1F…5AB00A）。
+- 新增pages/WorkbenchPage：企鹅欢迎头、两列四卡＋末行通栏，五项服务，500ms长按常用、按账号preferences存储及底部常用弹层；欢迎头进入官网。头图来自安卓独立无文字资产workbench/header-campus-penguin-v1.png。
+- BottomTabs第三项改工作台，toolbox线条图标；GradePage改为工作台内页，返回/刷新、课程搜索/课程代码/条数、蓝色成绩，复用原成绩缓存及学期选择。
+- ExamPage增加学年学期选择与按账号/学期缓存，选择捕获请求版本防旧结果覆盖；列表显示课程号/教师（接口有值时）/固定教室列/座位/原时间，复用现有教务链。当前学校fetchExams仍一次最多100条，未擅自宣称已补全分页。
+- 新ServiceWebPage仅允许已登记官网/考试院/自主选课入口，只有JW自主选课注入JW Cookie；临时官网返回关闭，常规网页系统返回先退历史；不将JW Cookie传入考试院或官网。远端业务登录/提交未验证。
+- clearPersonalData增加工作台常用与考试缓存清理；无新增权限。隐私说明需要同步官网与考试院浏览的第三方边界。
+
+
+2026-11-16 格子宽度：TimetableSettings 新增课表格子宽度滑块，显示实测基础宽度乘比例后的 vp 整数值；范围为当前基础宽度的87.5%～125%。高度滑块与背景/面板透明预览逻辑保持不变。
+
+2026-11-16 宽度重叠修正：上条0.875～1.25范围已替换为0.875～1；SettingsStore.load夹回旧超限值，TimetableGrid.blockW按子列unit-1设上限（移除14vp最小宽导致的多列越界）。设置页P1布局为格子高度/格子宽度、下方灰色vp、蓝色滑块，无底部范围文字；宽度0.1vp步进。原背景/面板opacity未改。
+
+2026-11-16 安卓列宽方案替换此前卡片缩放方案：Index新增timetablePane复用日期栏及纵向Scroll；手动周视图包入同一水平Scroll，内容宽cellWidth×天数+时间轴38+双侧边距24。时间轴一起横滚。Swiper.disableSwipe在手动模式启用，顶部周数仍控制index，日视图保持原布局。TimetableSettings范围45～55vp、步长0.1，超宽背景左对齐裁切，原透明度分支未改。
+
+2026-11-16 时间轴样式对齐安卓solution最新423段：TimetableGrid左侧三行（节次/开始/结束）均12fp字号、12vp行高及高度，间距1vp、居中；节次Normal/textHint，时间textHint且opacity0.75。读取periods，不改默认时间、个人设置、列宽或卡片。
+
+2026-11-16 安卓最新自适应/课程文字/日视图迁移（替换此前宽度方案）：撤回固定45～55vp和整表横滚方案；Index复用原单屏纵向布局/Swiper翻周，网格key含比例。TimetableSettings用实测列宽0.8～1比例滑块，显示vp，保存时清旧cellWidth=0并更新liveRatio；预览与首页相同外边距，opacity逻辑保留。Index.displayedWeek在日视图取当天周；日视图课程、标题、日期范围、周条统一当天，切回不重置week；详情捕获detailWeek用于编辑/仅本周删除。
+
+2026-11-16 安卓最终方案同步：Index移除整表横滚、恢复所有宽度下Swiper翻周；displayedWeek在日视图用当前学期今天所在周，标题/日期/DayList一致，切回周仍原week。detailWeek捕获详情周次供编辑及仅本周删除。TimetableSettings按实际测量列宽显示vp，保存0.8～1比例，原背景/面板透明度保持。
+
+2026-11-16 日视图时间配色逻辑：当天日视图课程已上完蓝色、未开始/进行中红色；结束边界含整分钟。读取用户PeriodStore节次时间，不写入课程数据。日视图标题/筛选周次沿用此前当天隔离修复。
+
+2026-11-16 联网北京时间：TermCalendar/DayList/Index共用北京时间，修正系统时区导致周次错位；DayList课程颜色/日期/星期用同一个clockTime快照。跨日日期刷新保留周日隔离。
+
+2026-11-16 工作台常用功能退役：WorkbenchPage删除LongPressGesture、菜单遮罩、添加/移除/查看常用、WorkbenchFavorites弹层及preferences读写/状态。五项服务及官网点击入口不变。PrivacyDocPage删除常用收集条目，ServiceLocator仍清理旧fxw_workbench数据以兼容历史版本；不自动清除用户其他数据。
+
+2026-11-17 成绩/考试按安卓当前开发日志复刻：GradePage按Android grade-query布局：居中成绩查询、60vp学年学期框、40vp搜索、共N门课程，固定顶部控制区、白底无卡片列表、18fp名称/13fp代码/23fp蓝色成绩，无绩点/学分/课程性质。ExamPage统一学期滚轮与共N场考试；卡片课程/教室座位/日期时间三列，无倒计时标签、网页按钮或新统计。两页滚轮仅完成提交、关闭取消。

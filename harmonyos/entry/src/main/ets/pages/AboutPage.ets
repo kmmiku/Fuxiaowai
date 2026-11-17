@@ -7,12 +7,12 @@ import router from '@ohos.router';
 struct AboutPage {
   @StorageLink('dark') dark: boolean = false;
   private rows: string[][] = [
-    ['版本', 'v0.1.1（开发版）'],
+    ['版本', 'v0.1.1'],
     ['服务院校', '福州外语外贸学院'],
     ['数据来源', '正方教务系统 jwglxt'],
     ['课表范围', '2026—2027 学年 第 1 学期'],
     ['网络', '仅在校验账号时访问教务系统'],
-    ['收集信息', '不上传任何个人信息']
+    ['收集信息', '本机保存；分享、反馈及登录统计按声明处理']
   ];
 
   build() {
