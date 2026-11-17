@@ -44,7 +44,9 @@
 | 平台 | 版本 | 安装包 | 获取 |
 | --- | --- | --- | --- |
 | HarmonyOS | 0.1.1（versionCode 1000001） | `Fuxiaowai-0.1.1-harmonyos.hap`（2.85 MB）<br>`Fuxiaowai-0.1.1-harmonyos-app.zip`（上架包） | [Releases · v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/v0.1.1)；正式安装请到**华为应用市场**搜索「福小外」 |
-| Android | 0.1.1（versionCode 3） | `Fuxiaowai-Android-0.1.1.apk`（9.78 MB） | [Releases · android-v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/android-v0.1.1)；Debug 验收包，Android 5.1+ |
+| Android | 0.1.1（versionCode 3） | `Fuxiaowai-Android-0.1.1.apk`（9.78 MB） | [Releases · v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/v0.1.1)（与鸿蒙版同页）或 [Releases · android-v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/android-v0.1.1)；Debug 验收包，Android 5.1+ |
+
+> **双端同版本发布**：`v0.1.1` 这一个 Release 页面同时挂着鸿蒙的 `.hap`、上架用 `.app`（以 `-app.zip` 提供）和安卓的 `.apk`；`android-v0.1.1` 另留了一份安卓单页，内容与之一致。
 
 变更详情：[鸿蒙版 0.1.1 发布说明](docs/release-notes/0.1.1.md) ｜ [安卓版 0.1.1 发布说明](docs/release-notes/0.1.1-android.md)。
 
