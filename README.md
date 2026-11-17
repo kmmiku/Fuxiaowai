@@ -10,7 +10,7 @@
 ![Android](https://img.shields.io/badge/Android-0.1.1%20(API%2022%2B)-3DDC84?logo=android&logoColor=white)
 ![Language](https://img.shields.io/badge/Language-ArkTS%20%2B%20TypeScript-3178C6)
 ![Version](https://img.shields.io/badge/Version-0.1.1-success)
-![Tests](https://img.shields.io/badge/Tests-77%20%2B%2056%20pass-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-89%20%2B%2056%20pass-brightgreen)
 ![License](https://img.shields.io/badge/License-个人学习项目-blue)
 
 [界面预览](#界面预览) · [主要功能](#主要功能) · [仓库结构](#仓库结构) · [Android 版](#android-版011) · [构建与运行](#构建与运行) · [发布说明](#版本与发布)
@@ -21,7 +21,7 @@
 
 ## 这是什么
 
-**福小外** 把一学期的课表收进手机：周视图一屏看全一周，点开课程就是全部信息；主页收敛成一个「三点菜单」——周数一拖就跳、课表一键切换、八个常用入口一眼找到。课程可以手动录入，也可以用一个 **32 位口令**和同学互换，没登录教务也能先导入游客课表试用。你可以把课表导出到系统日历、设置上课提醒，或者在桌面放一张「今天的课」卡片。所有信息都保存在本机，卸载即清空。
+**福小外** 把一学期的课表收进手机：周视图一屏看全一周，点开课程就是全部信息；主页收敛成一个「三点菜单」——周数一拖就跳、课表一键切换、八个常用入口一眼找到。课程可以手动录入，也可以用一个 **32 位口令**和同学互换，没登录教务也能先导入游客课表试用。第二屏**工作台**把成绩、考试安排、自主选课、四六级与学院官网收在同一个入口，登录一次教务系统就能查。你可以把课表导出到系统日历、设置上课提醒，或者在桌面放一张「今天的课」卡片。所有信息都保存在本机，卸载即清空。
 
 > **当前发布形态：鸿蒙原生 + 安卓双端**
 > 鸿蒙端是原生 ArkTS / Stage 模型实现（`harmonyos/`，第一版）；安卓端把同一套页面按 1:1 规格重写为 React + TypeScript Web 层，用 Capacitor 6 装进原生壳（`android/`，0.1.1 / versionCode 3）。
@@ -33,8 +33,8 @@
 | 包名 / applicationId | `com.fuxiaowai.timetable`（两端一致） |
 | 适配平台 | HarmonyOS 5.0.0 (API 12) Stage 模型，手机 / 平板 ｜ Android 5.1+（`minSdk 22` / `targetSdk 34`） |
 | 开发语言 | ArkTS（ArkUI 声明式）｜ React 18 + TypeScript 5.6（Web 层）+ Java（原生能力层） |
-| 当前版本 | **0.1.1**（鸿蒙第一版 ｜ 安卓 `versionCode 3`） |
-| 体积 | 鸿蒙 HAP 约 1.47 MB ｜ 安卓 APK 约 4.41 MB |
+| 当前版本 | **0.1.1**（鸿蒙 2026-11-17 交付 ｜ 安卓 `versionCode 3`） |
+| 体积 | 鸿蒙 HAP 约 2.85 MB ｜ 安卓 APK 约 9.78 MB（Debug 包，未裁剪调试信息） |
 | 价格 | 免费，无广告、无内购 |
 | 开发者 | 个人开发者（独立开发） |
 | 分享服务 | `http://113.45.242.182`（备案期直连 IP，反馈仍走 `https://fuxiaowai.xyz`） |
@@ -43,8 +43,8 @@
 
 | 平台 | 版本 | 安装包 | 获取 |
 | --- | --- | --- | --- |
-| HarmonyOS | 0.1.1（第一版） | `Fuxiaowai-0.1.1-harmonyos.hap`（1.43 MB）<br>`Fuxiaowai-0.1.1-harmonyos-app.zip`（上架包） | [Releases · v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/v0.1.1)；正式安装请到**华为应用市场**搜索「福小外」 |
-| Android | 0.1.1（versionCode 3） | `Fuxiaowai-Android-0.1.1.apk`（4.41 MB） | [Releases · android-v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/android-v0.1.1)；Debug 验收包，Android 5.1+ |
+| HarmonyOS | 0.1.1（versionCode 1000001） | `Fuxiaowai-0.1.1-harmonyos.hap`（2.85 MB）<br>`Fuxiaowai-0.1.1-harmonyos-app.zip`（上架包） | [Releases · v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/v0.1.1)；正式安装请到**华为应用市场**搜索「福小外」 |
+| Android | 0.1.1（versionCode 3） | `Fuxiaowai-Android-0.1.1.apk`（9.78 MB） | [Releases · android-v0.1.1](https://github.com/kmmiku/Fuxiaowai/releases/tag/android-v0.1.1)；Debug 验收包，Android 5.1+ |
 
 变更详情：[鸿蒙版 0.1.1 发布说明](docs/release-notes/0.1.1.md) ｜ [安卓版 0.1.1 发布说明](docs/release-notes/0.1.1-android.md)。
 
@@ -72,7 +72,7 @@
 </tr>
 <tr>
 <td align="center"><img src="docs/screenshots/10-dark.png" width="210"><br><b>深色模式</b><br>跟随系统</td>
-<td align="center" colspan="2"><i>更多素材见 <a href="harmonyos/assets/design/store">harmonyos/assets/design/store</a>（含 1024 应用图标与商店预览图）</i></td>
+<td align="center" colspan="2"><i>应用市场用的卡片版截图（1080×1920）见 <a href="android/assets/design/store/screens-cards">android/assets/design/store/screens-cards</a>，原尺寸截图（1080×2400）见 <a href="android/assets/design/store/screens">android/assets/design/store/screens</a>，1024 应用图标见 <a href="harmonyos/assets/design/store">harmonyos/assets/design/store</a></i></td>
 </tr>
 </table>
 
@@ -81,7 +81,7 @@
 ## 主要功能
 
 ### 课表查看
-周视图与日视图，左右滑动切换一周、上下滑动切换学期；支持深色模式与自定义主题色。
+周视图与日视图，左右滑动切换一周、上下滑动切换学期；左侧节次栏按「节次 / 开始 / 结束」三行对齐，课程块整列宽自适应（卡片占子列 80%–100%，长教室号自动拆两行），也可用手动宽度滑块（45–55 vp，0.1 步长）微调。日视图按上课状态上色：课前与课中红色、已结束转蓝色。支持深色模式与自定义主题色。
 
 ### 三点菜单（第一版改版）
 主页只保留标题、日期、课表与底部导航，其余入口全部收进右上角「⋯」：上半张卡片是**周数滑块**（拖动时只跟手、松手才刷新课表）与**课表切换/新建/管理**，下半张是**八个入口**（上课时间、课表设置、上课提醒、小组件、联系我们、主题设置、夜间模式、检查更新）。二级页面打开时菜单自动关闭，小屏可滚动。
@@ -95,14 +95,17 @@
 ### 教务系统同步
 登录学校教务系统（正方 `jwglxt` / CAS 统一身份认证 / 企业微信扫码）后一键导入本学期课程、成绩与考试安排。第一版重写了跳转与票据链路：301/302/303 转 GET、307/308 保留方法、外部跳转拒绝、**只有 HTTP 200 + 合法 JSON + `kbList` 数组才算成功**，失败不落库。
 
+### 工作台
+底栏第二屏「工作台」：居中欢迎头 + 5 张服务卡（成绩查询、考试安排、自主选课、四六级、学院官网）。成绩与考试在应用内打开，带返回与刷新；自主选课、四六级、学院官网走独立网页容器，登录态复用教务 Cookie，且只对教务自主选课注入。
+
 ### 校历
-按学期展示教学周与节假日，日期字号与周分割线重做，随时对照「现在是第几周」。
+按学期展示教学周与节假日，随时对照「现在是第几周」。日期计算统一走 UTC 字段、再按北京时间渲染，跨时区与夏令时都不会错周。
 
 ### 成绩查询
-查看成绩、学分与绩点统计，本地缓存，支持多学期对比。
+应用内成绩页：学年学期滚轮、搜索框、「共 N 门课程」，白底分隔列表（课程名 / 课程代码 / 成绩），按账号缓存；顶部标题与列表独立滚动。
 
 ### 考试安排
-汇总本学期考试时间与地点，和课表放在同一处。
+应用内考试页：全宽学期框 + 「共 N 场考试」+ 三列圆角卡片（课程/课程号/教师 · 教室与座位 · 日期与时间）。
 
 ### 上课提醒
 按本周课表生成提醒，可提前 5 / 10 / 15 / 30 分钟；也可整学期导出到系统日历（写入前先读，避免重复）。
@@ -127,6 +130,23 @@
 | **稳定性** | HUKS `createKey` 的 `12000011` 视为密钥不存在；ArkTS 不支持 `delete` 字典字段改为过滤重建 |
 | **管理后台** | 配套 `server/` 新增零依赖后台 v2（口令检测/反馈/探针/告警/审计），仅管理员可访问 |
 | **工程规范** | 新增 `AGENTS.md` 验收条款（改动必须装模拟器停在目标页）、9 份工程地图全量重写 |
+
+---
+
+## 0.1.1 工作台与兼容加固（2026-11-15 → 11-17）
+
+第一版之后又在 11-15 到 11-17 做了三轮：工作台与成绩/考试内页、课表自适应宽度与状态色、联网校时与启动更新。逐条根因与验证记录见 [`harmonyos/Solution.md`](harmonyos/Solution.md)。
+
+| 主题 | 变更 |
+| --- | --- |
+| **工作台** | 新增 `WorkbenchPage` 与 `ServiceWebPage` 两个注册页面，底栏第三项「工作台」；欢迎头 34fp，双列卡 156vp + 通栏卡 100vp 共 5 项服务 |
+| **成绩与考试** | 从外链改为应用内页面，按安卓当前 UI 复刻：居中标题、蓝色返回与刷新线图标、60vp 学年学期框底部滚轮、40vp 搜索框；考试改三列圆角卡片，教室与座位独立成列 |
+| **课表宽度** | 先做百分比缩放滑块，因卡片越列返工为「手动列宽 45–55vp」与「自动等分」两种模式；自动模式用逐字测量把「教5404」拆成「教5 / 404」两行 |
+| **状态色** | 日视图按末节结束时间判断：课前与课中红、已结束蓝，时间每秒刷新；周日「今天」与「浏览周」分离，详情页捕获进入时的周 |
+| **联网校时** | 新增 `BeijingClock`（进程内单调推进）与 `ClockSync`（首启 + 每 5 分钟 HEAD 学校官网取 `Date`，HTTPS 校验、不带账号、拒绝非 200 与缓存响应），不修改系统时区 |
+| **启动更新与公告** | 接官方版本接口，后台可下发版本号、更新说明与公告；被忽略的版本记在设备偏好 `fxw_app_update.ignoredVersion` 不再提示 |
+| **匿名统计** | 登录成功后尽力上报一条：`HMAC-SHA-256` 学号摘要 + 首次计日期；后台「用户列表」展示累计人数、7 日折线与用户编号，30 秒刷新 |
+| **签名与交付** | AGC 发行 Profile 签名 HAP 2 987 208 B（`CE61F9D6…DE8E`），配套 `.app` 2 113 594 B；用例 89 通过 / 1 跳过 |
 
 ---
 
@@ -331,8 +351,9 @@ npm run apk            # Gradle assembleDebug → app-debug.apk
 
 | 版本 | 平台 | 日期 | 说明 |
 | --- | --- | --- | --- |
+| **0.1.1（2026-11-17 交付）** | HarmonyOS | 2026-11-17 | 工作台 / 成绩与考试内页复刻安卓 / 自适应列宽 / 日视图红蓝 / 联网北京时间 / 启动更新与公告 / 匿名统计 |
 | **0.1.1（第一版）** | HarmonyOS | 2026-11-14 | 三点菜单 / 周数滑块 / 口令分享与游客导入 / 302 与票据加固 / 后台 v2 |
-| **0.1.1**（versionCode 3） | Android | 2026-11-15 | 22 页 1:1 复刻 / 账号隔离存储 / 教务登录与 Keystore 凭据 / 口令分享 / 日历·提醒·小组件 / 双平台版本接口 |
+| **0.1.1**（versionCode 3） | Android | 2026-11-16 | 工作台与内嵌服务页 / 22 页 1:1 复刻 / 账号隔离存储 / 教务登录与 Keystore 凭据 / 口令分享 / 日历·提醒·小组件 / 双平台版本接口 |
 | 0.1.1（初版） | HarmonyOS | 2026-11 | 兼容性加固（Cookie、RSA 登录参数、数据库迁移健壮性），深色模式对比度修正 |
 | 0.1.0 | HarmonyOS | 2026-10 | 首个可上架版本：课表/成绩/考试/校历/提醒/小组件 |
 
@@ -344,9 +365,9 @@ npm run apk            # Gradle assembleDebug → app-debug.apk
 
 | 文件 | 平台 | 大小 | SHA-256 |
 | --- | --- | --- | --- |
-| `Fuxiaowai-0.1.1-harmonyos.hap` | HarmonyOS | 1 503 288 B | `123E78B88788B8C8E19DB469A99163363112FBD29FF181E4128E84BA5EDC18E5` |
-| `Fuxiaowai-0.1.1-harmonyos-app.zip` | HarmonyOS | 973 918 B | `59F8ED979394EA094594F16B6458B95A656DFC9B458FA87A38644B0D38542855` |
-| `Fuxiaowai-Android-0.1.1.apk` | Android | 4 628 048 B | `C22D6D288EBC13921AE31C05E6B37E1D47E7131BC5E15BA418A1E8E651CF1229` |
+| `Fuxiaowai-0.1.1-harmonyos.hap` | HarmonyOS | 2 987 208 B | `CE61F9D68C9A14F0966D9EC14412893F877970CA330F883DD0BA44A24E92DE8E` |
+| `Fuxiaowai-0.1.1-harmonyos.app`（Releases 内以 `.app` 原名提供） | HarmonyOS | 2 113 594 B | `367893C0B2955C719EFC303240DF49DDA9B18CEFC2552D4DCDF843D85598EC6B` |
+| `Fuxiaowai-Android-0.1.1.apk` | Android | 10 251 980 B | `BD96B7690C729109FA4C0D6C47FB89EFB7F094D182E5EADDEB690215F8C98C22` |
 
 ---
 
@@ -356,6 +377,7 @@ npm run apk            # Gradle assembleDebug → app-debug.apk
 - 安卓端数据落在应用私有的 `localStorage`（每个账号、每张课表独立命名空间，含 undo 日志与整表快照，供异常回滚）；登录凭据只在原生 `SecretVault` 内以 Android Keystore 加密保存，密文不可解密时保留密文、不降级写明文。
 - 仅在你主动点「分享课表」时，才会把课表快照临时存到口令服务（`http://113.45.242.182`），**口令 30 天后自动失效**。
 - 仅在你主动点「提交反馈」时，才会把反馈文字、联系方式与所附图片发送到服务端（`https://fuxiaowai.xyz`）。
+- 登录成功后会上报一条**匿名统计**：只含学号的不可逆摘要（`HMAC-SHA-256`，服务端随机密钥）与首次计日期，用于统计使用人数；摘要无法还原学号，也不含姓名、课表或成绩内容。
 - 配套管理后台只对管理员账号开放（HTTP Basic 认证 + 同源写保护），不对外提供任何公共接口。
 - 卸载应用即清空全部本地数据。
 - 本仓库与发布产物**不含开发者个人信息**：姓名 / 学号 / 邮箱 / 签名证书 / 华为审核自测材料均已移除或替换为中性值（应用包 `vendor` 为 `fuxiaowai`）。

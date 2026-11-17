@@ -96,6 +96,7 @@ android/                              # 本目录 = Android 版工程根
 ├── tools/                            # UI 合同校验、UI 回归、数据备份、模拟器启动脚本
 ├── server/                           # 口径分享 / 反馈 / 双平台版本 / 管理后台 / 官网静态页
 ├── Map/                              # 改造记录与验证证据（11 份文档 + evidence）
+├── assets/design/store/              # 应用市场素材：screens-cards（1080×1920 卡片版）、screens（1080×2400）、两张预览长图
 ├── index.html · vite.config.ts · tsconfig.json · capacitor.config.ts
 ├── package.json                      # name: fuxiaowai-android, version 0.1.1
 └── AGENTS.md                         # 本工程开发约定（版本策略、打包流程、后台同步）
@@ -168,7 +169,7 @@ npm run check   # test + check:ui + build（提交前必须全绿）
 
 | 文件 | 大小 | SHA-256 |
 | --- | --- | --- |
-| `Fuxiaowai-Android-0.1.1.apk`（构建名 `福小外-Android-0.1.1.apk`，Debug 验收包） | 4 628 048 B | `C22D6D288EBC13921AE31C05E6B37E1D47E7131BC5E15BA418A1E8E651CF1229` |
+| `Fuxiaowai-Android-0.1.1.apk`（构建名 `福小外-Android-0.1.1.apk`，Debug 验收包，含工作台） | 10 251 980 B | `BD96B7690C729109FA4C0D6C47FB89EFB7F094D182E5EADDEB690215F8C98C22` |
 
 > Release 附件不支持非 ASCII 文件名，上传时以 `Fuxiaowai-` 前缀命名，内容与本地构建产物一致（GitHub 侧 digest 相同）。
 
