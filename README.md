@@ -366,7 +366,7 @@ npm run apk            # Gradle assembleDebug → app-debug.apk
 | 文件 | 平台 | 大小 | SHA-256 |
 | --- | --- | --- | --- |
 | `Fuxiaowai-0.1.1-harmonyos.hap` | HarmonyOS | 2 987 208 B | `CE61F9D68C9A14F0966D9EC14412893F877970CA330F883DD0BA44A24E92DE8E` |
-| `Fuxiaowai-0.1.1-harmonyos.app`（Releases 内以 `.app` 原名提供） | HarmonyOS | 2 113 594 B | `367893C0B2955C719EFC303240DF49DDA9B18CEFC2552D4DCDF843D85598EC6B` |
+| `Fuxiaowai-0.1.1-harmonyos-app.zip`（即 `.app` 上架包，因 GitHub 不接受 `.app` 后缀而改 zip） | HarmonyOS | 2 113 594 B | `367893C0B2955C719EFC303240DF49DDA9B18CEFC2552D4DCDF843D85598EC6B` |
 | `Fuxiaowai-Android-0.1.1.apk` | Android | 10 251 980 B | `BD96B7690C729109FA4C0D6C47FB89EFB7F094D182E5EADDEB690215F8C98C22` |
 
 ---
